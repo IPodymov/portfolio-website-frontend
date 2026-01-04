@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
 
@@ -21,18 +21,30 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
         <div className="navbar-links">
-          <Link to="/" className="navbar-link">
+          <NavLink 
+            to="/" 
+            className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
+          >
             Главная
-          </Link>
-          <Link to="/contacts" className="navbar-link">
+          </NavLink>
+          <NavLink 
+            to="/contacts" 
+            className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
+          >
             Контакты
-          </Link>
-          <Link to="/order" className="navbar-link">
+          </NavLink>
+          <NavLink 
+            to="/order" 
+            className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
+          >
             Заказать ПО
-          </Link>
-          <Link to="/reviews" className="navbar-link">
+          </NavLink>
+          <NavLink 
+            to="/reviews" 
+            className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
+          >
             Отзывы
-          </Link>
+          </NavLink>
         </div>
       </div>
 

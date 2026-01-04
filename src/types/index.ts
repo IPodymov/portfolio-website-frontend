@@ -10,6 +10,8 @@ export interface Review {
   username: string;
   body: string;
   projectLink: string;
+  rating?: number;
+  serviceQuality?: string;
   createdAt?: string;
 }
 
