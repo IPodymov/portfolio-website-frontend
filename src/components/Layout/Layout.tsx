@@ -1,6 +1,7 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import Navbar from '../Navbar/Navbar';
+import CookieConsent from '../CookieConsent/CookieConsent';
 import './Layout.css';
 
 const Layout: React.FC = () => {
@@ -11,8 +12,12 @@ const Layout: React.FC = () => {
         <Outlet />
       </main>
       <footer className="layout-footer">
-        <p>&copy; {new Date().getFullYear()} Ivan Podymov. All rights reserved.</p>
+        <div className="footer-content">
+          <p>&copy; {new Date().getFullYear()} Ivan Podymov. All rights reserved.</p>
+          <Link to="/privacy" className="footer-link">Политика конфиденциальности</Link>
+        </div>
       </footer>
+      <CookieConsent />
     </div>
   );
 };

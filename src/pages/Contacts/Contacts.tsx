@@ -1,40 +1,138 @@
-import React from 'react';
+import React, { useState } from 'react';
+import EmailIcon from '@mui/icons-material/Email';
+import TelegramIcon from '@mui/icons-material/Telegram';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import './Contacts.css';
 
 const Contacts: React.FC = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    telegram: '',
+    message: '',
+  });
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('submitting');
+    // Simulate API call
+    setTimeout(() => {
+      console.log('Form submitted:', formData);
+      setStatus('success');
+      setFormData({ name: '', telegram: '', message: '' });
+      setTimeout(() => setStatus('idle'), 3000);
+    }, 1000);
+  };
+
   return (
     <div className="contacts-container">
-      <h1 className="contacts-title">Контакты</h1>
-      <div className="contacts-card">
-        <p className="contacts-description">Свяжитесь со мной для обсуждения вашего проекта.</p>
-        <ul className="contacts-list">
-          <li className="contacts-item">
-            <strong>Email:</strong>{' '}
-            <a href="mailto:podymovv55@gmail.com" className="contacts-link">
+      <div className="contacts-header">
+        <h1 className="section-title">Свяжитесь со мной</h1>
+        <p className="contacts-subtitle">
+          Есть идея проекта или предложение о работе? Напишите мне, и мы обсудим детали.
+          Я всегда открыт к новым возможностям и интересному сотрудничеству.
+        </p>
+      </div>
+
+      <div className="contacts-content">
+        <div className="contacts-info">
+          <div className="contact-card">
+            <div className="contact-icon"><EmailIcon fontSize="inherit" /></div>
+            <h3>Email</h3>
+            <p>Пишите в любое время</p>
+            <a href="mailto:podymovv55@gmail.com" className="contact-link">
               podymovv55@gmail.com
             </a>
-          </li>
-          <li className="contacts-item">
-            <strong>GitHub:</strong>{' '}
-            <a
-              href="https://github.com/IPodymov"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="contacts-link">
-              github.com/IPodymov
-            </a>
-          </li>
-          <li className="contacts-item">
-            <strong>Telegram:</strong>{' '}
+          </div>
+
+          <div className="contact-card">
+            <div className="contact-icon"><TelegramIcon fontSize="inherit" /></div>
+            <h3>Telegram</h3>
+            <p>Быстрая связь в мессенджере</p>
             <a
               href="https://t.me/ipodymov"
               target="_blank"
               rel="noopener noreferrer"
-              className="contacts-link">
-              @IPodymov
+              className="contact-link">
+              @ipodymov
             </a>
-          </li>
-        </ul>
+          </div>
+
+          <div className="contact-card">
+            <div className="contact-icon"><GitHubIcon fontSize="inherit" /></div>
+            <h3>GitHub</h3>
+            <p>Посмотрите мой код</p>
+            <a
+              href="https://github.com/IPodymov"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-link">
+              github.com/IPodymov
+            </a>
+          </div>
+        </div>
+
+        <div className="contacts-form-wrapper">
+          <h2>Напишите мне</h2>
+          <form className="contacts-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="name">Ваше имя</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                placeholder="Иван Иванов"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="telegram">Telegram Username</label>
+              <input
+                type="text"
+                id="telegram"
+                name="telegram"
+                value={formData.telegram}
+                onChange={handleChange}
+                required
+                placeholder="@username"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="message">Сообщение</label>
+              <textarea
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                required
+                placeholder="Расскажите о вашем проекте..."
+                rows={5}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary btn-block"
+              disabled={status === 'submitting'}>
+              {status === 'submitting' ? 'Отправка...' : 'Отправить сообщение'}
+            </button>
+
+            {status === 'success' && (
+              <div className="success-message">
+                Спасибо! Ваше сообщение отправлено.
+              </div>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );

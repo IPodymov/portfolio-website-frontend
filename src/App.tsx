@@ -9,6 +9,7 @@ import Order from './pages/Order/Order';
 import Reviews from './pages/Reviews/Reviews';
 import ReviewDetail from './pages/ReviewDetail/ReviewDetail';
 import Profile from './pages/Profile/Profile';
+import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
 import './App.css';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
             <Route path="order" element={<Order />} />
             <Route path="reviews" element={<Reviews />} />
             <Route path="reviews/:id" element={<ReviewDetail />} />
+            <Route path="privacy" element={<PrivacyPolicy />} />
           </Route>
         </Routes>
       </Router>

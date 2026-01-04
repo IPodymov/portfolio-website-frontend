@@ -88,16 +88,19 @@ body {
 .container-sm {
   max-width: 400px;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .container-md {
   max-width: 600px;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .container-lg {
   max-width: 800px;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .card {
@@ -105,6 +108,12 @@ body {
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 1.5rem;
+  }
 }
 
 .text-center {

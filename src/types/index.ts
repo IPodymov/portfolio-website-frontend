@@ -20,7 +20,7 @@ export interface Review {
 export interface Order {
   id?: number;
   name: string;
-  email: string;
+  telegram: string;
   description: string;
   type: 'landing' | 'ecommerce' | 'webapp' | 'bot' | 'other';
 }
@@ -44,4 +44,6 @@ export interface GitHubRepo {
   name: string;
   language: string;
   stargazers_count: number;
+  description: string | null;
+  html_url: string;
 }

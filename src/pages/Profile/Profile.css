@@ -74,3 +74,10 @@
   text-align: center;
   margin-bottom: 1rem;
 }
+
+@media (max-width: 600px) {
+  .profile-container {
+    padding: 1.5rem;
+    margin: 1rem auto;
+  }
+}

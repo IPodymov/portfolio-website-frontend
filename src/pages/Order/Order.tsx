@@ -4,7 +4,7 @@ import { ordersApi } from '../../api/orders';
 const Order: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
+    telegram: '',
     description: '',
     type: 'landing' as const,
   });
@@ -15,7 +15,7 @@ const Order: React.FC = () => {
     try {
       await ordersApi.create(formData);
       setStatus('success');
-      setFormData({ name: '', email: '', description: '', type: 'landing' });
+      setFormData({ name: '', telegram: '', description: '', type: 'landing' });
     } catch (error) {
       setStatus('error');
     }
@@ -52,12 +52,13 @@ const Order: React.FC = () => {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">Telegram Username</label>
             <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              type="text"
+              value={formData.telegram}
+              onChange={(e) => setFormData({ ...formData, telegram: e.target.value })}
               required
+              placeholder="@username"
               className="form-control"
             />
           </div>

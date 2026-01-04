@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { reviewsApi } from '../../api/reviews';
 import type { Review } from '../../types';
+import StarIcon from '@mui/icons-material/Star';
 import './ReviewDetail.css';
 
 const ReviewDetail: React.FC = () => {
@@ -44,8 +45,15 @@ const ReviewDetail: React.FC = () => {
             )}
           </div>
           <div className="review-detail-rating">
-            {'★'.repeat(review.rating || 0)}
-            <span style={{ color: '#e0e0e0' }}>{'★'.repeat(5 - (review.rating || 0))}</span>
+            {[...Array(5)].map((_, i) => (
+              <StarIcon 
+                key={i} 
+                style={{ 
+                  color: i < (review.rating || 0) ? '#FFD700' : '#e0e0e0',
+                  fontSize: '1.5rem'
+                }} 
+              />
+            ))}
           </div>
         </div>
 

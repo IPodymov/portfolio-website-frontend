@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { reviewsApi } from '../../api/reviews';
 import type { Review } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import StarIcon from '@mui/icons-material/Star';
 import './Reviews.css';
 
 const Reviews: React.FC = () => {
@@ -69,19 +70,19 @@ const Reviews: React.FC = () => {
             <div className="form-group">
               <label className="form-label">Оценка</label>
               <div
-                style={{ display: 'flex', gap: '0.5rem', fontSize: '1.5rem', cursor: 'pointer' }}
+                style={{ display: 'flex', gap: '0.25rem', cursor: 'pointer' }}
                 onMouseLeave={() => setHoverRating(0)}>
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <span
+                  <StarIcon
                     key={star}
                     onClick={() => setNewReview({ ...newReview, rating: star })}
                     onMouseEnter={() => setHoverRating(star)}
                     style={{
                       color: star <= (hoverRating || newReview.rating) ? '#FFD700' : '#ccc',
                       transition: 'color 0.2s',
-                    }}>
-                    ★
-                  </span>
+                      fontSize: '2rem'
+                    }}
+                  />
                 ))}
               </div>
             </div>
@@ -155,8 +156,15 @@ const Reviews: React.FC = () => {
                   </div>
 
                   <div className="review-rating">
-                    {'★'.repeat(review.rating || 0)}
-                    <span style={{ color: '#e0e0e0' }}>{'★'.repeat(5 - (review.rating || 0))}</span>
+                    {[...Array(5)].map((_, i) => (
+                      <StarIcon 
+                        key={i} 
+                        style={{ 
+                          color: i < (review.rating || 0) ? '#FFD700' : '#e0e0e0',
+                          fontSize: '1.2rem'
+                        }} 
+                      />
+                    ))}
                   </div>
 
                   {review.serviceQuality && (
