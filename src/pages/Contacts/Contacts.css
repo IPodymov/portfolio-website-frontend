@@ -1,0 +1,33 @@
+.contacts-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.contacts-title {
+  margin-bottom: 2rem;
+}
+
+.contacts-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.contacts-description {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.contacts-list {
+  list-style: none;
+  padding: 0;
+}
+
+.contacts-item {
+  margin-bottom: 1rem;
+}
+
+.contacts-link {
+  color: var(--color-accent);
+}
