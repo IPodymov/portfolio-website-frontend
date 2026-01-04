@@ -4,7 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../api/auth';
 
 const Register: React.FC = () => {
-  const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,10 +15,10 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = await authApi.register({ username, email, password });
+      const data = await authApi.register({ firstName, lastName, email, password });
       login(data.token, data.user);
       navigate('/');
-    } catch (err) {
+    } catch {
       setError('Ошибка регистрации. Возможно email уже занят.');
     }
   };
@@ -28,11 +29,21 @@ const Register: React.FC = () => {
       {error && <div className="form-error">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label">Имя пользователя</label>
+          <label className="form-label">Имя</label>
           <input
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+            className="form-control"
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Фамилия</label>
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             required
             className="form-control"
           />

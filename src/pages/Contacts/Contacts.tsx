@@ -6,18 +6,33 @@ const Contacts: React.FC = () => {
     <div className="contacts-container">
       <h1 className="contacts-title">Контакты</h1>
       <div className="contacts-card">
-        <p className="contacts-description">
-          Свяжитесь со мной для обсуждения вашего проекта.
-        </p>
+        <p className="contacts-description">Свяжитесь со мной для обсуждения вашего проекта.</p>
         <ul className="contacts-list">
           <li className="contacts-item">
-            <strong>Email:</strong> <a href="mailto:podymovv55@gmail.com" className="contacts-link">contact@ipodymov.com</a>
+            <strong>Email:</strong>{' '}
+            <a href="mailto:podymovv55@gmail.com" className="contacts-link">
+              podymovv55@gmail.com
+            </a>
           </li>
           <li className="contacts-item">
-            <strong>GitHub:</strong> <a href="https://github.com/IPodymov" target="_blank" rel="noopener noreferrer" className="contacts-link">github.com/IPodymov</a>
+            <strong>GitHub:</strong>{' '}
+            <a
+              href="https://github.com/IPodymov"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contacts-link">
+              github.com/IPodymov
+            </a>
           </li>
           <li className="contacts-item">
-            <strong>Telegram:</strong> <a href="https://t.me/ipodymov" target="_blank" rel="noopener noreferrer" className="contacts-link">@IPodymov</a>
+            <strong>Telegram:</strong>{' '}
+            <a
+              href="https://t.me/ipodymov"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contacts-link">
+              @IPodymov
+            </a>
           </li>
         </ul>
       </div>

@@ -8,6 +8,7 @@ import Contacts from './pages/Contacts/Contacts';
 import Order from './pages/Order/Order';
 import Reviews from './pages/Reviews/Reviews';
 import ReviewDetail from './pages/ReviewDetail/ReviewDetail';
+import Profile from './pages/Profile/Profile';
 import './App.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="contacts" element={<Contacts />} />
             <Route path="order" element={<Order />} />
             <Route path="reviews" element={<Reviews />} />

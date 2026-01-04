@@ -14,4 +14,11 @@ export const authApi = {
     const response = await api.get<User>('/auth/me');
     return response.data;
   },
+  updateProfile: async (data: Partial<User> & { password?: string }) => {
+    const response = await api.put<User>('/auth/profile', data);
+    return response.data;
+  },
+  logout: async () => {
+    await api.post('/auth/logout');
+  },
 };

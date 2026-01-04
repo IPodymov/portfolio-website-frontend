@@ -17,20 +17,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Optionally verify token with backend
-      authApi
-        .getMe()
-        .then((userData) => setUser(userData))
-        .catch(() => {
-          localStorage.removeItem('token');
-          setUser(null);
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
+    authApi
+      .getMe()
+      .then((userData) => setUser(userData))
+      .catch(() => {
+        localStorage.removeItem('token');
+        setUser(null);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const login = (token: string, userData: User) => {
@@ -39,8 +33,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+    authApi.logout().finally(() => {
+      localStorage.removeItem('token');
+      setUser(null);
+    });
   };
 
   return (

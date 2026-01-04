@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { reviewsApi } from '../../api/reviews';
 import type { Review } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import './Reviews.css';
 
 const Reviews: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -40,7 +41,7 @@ const Reviews: React.FC = () => {
 
     try {
       await reviewsApi.create({
-        username: user.username,
+        username: user.firstName ? `${user.firstName} ${user.lastName || ''}` : user.email,
         body: newReview.body,
         projectLink: newReview.projectLink,
         rating: newReview.rating,
@@ -133,52 +134,56 @@ const Reviews: React.FC = () => {
           , чтобы оставить отзыв.
         </div>
       )}
-
-      {/* Reviews DataGrid (Table) */}
+      {/* Reviews Grid */}
       {loading ? (
-        <div>Загрузка...</div>
+        <div className="text-center py-5">Загрузка...</div>
       ) : (
-        <div className="reviews-table-container">
-          <table className="reviews-table">
-            <thead className="reviews-table-header">
-              <tr>
-                <th className="reviews-th">Имя</th>
-                <th className="reviews-th">Оценка</th>
-                <th className="reviews-th">Отзыв</th>
-                <th className="reviews-th">Проект</th>
-                <th className="reviews-th">Действия</th>
-              </tr>
-            </thead>
-            <tbody>
+        <>
+          {reviews.length === 0 ? (
+            <div className="reviews-empty">Нет отзывов</div>
+          ) : (
+            <div className="reviews-container">
               {reviews.map((review) => (
-                <tr key={review.id} className="reviews-tr">
-                  <td className="reviews-td">{review.username}</td>
-                  <td className="reviews-td" style={{ color: '#FFD700' }}>
+                <div key={review.id} className="review-card">
+                  <div className="review-header">
+                    <span className="review-author">{review.username}</span>
+                    {review.createdAt && (
+                      <span className="review-date">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="review-rating">
                     {'★'.repeat(review.rating || 0)}
-                  </td>
-                  <td className="reviews-td">
-                    {review.body.length > 50 ? `${review.body.substring(0, 50)}...` : review.body}
-                  </td>
-                  <td className="reviews-td">
+                    <span style={{ color: '#e0e0e0' }}>{'★'.repeat(5 - (review.rating || 0))}</span>
+                  </div>
+
+                  {review.serviceQuality && (
+                    <div className="review-quality">Качество: {review.serviceQuality}</div>
+                  )}
+
+                  <div className="review-body">
+                    {review.body.length > 150 ? `${review.body.substring(0, 150)}...` : review.body}
+                  </div>
+
+                  <div className="review-footer">
                     <a
                       href={review.projectLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="link-accent">
-                      Ссылка
+                      className="review-project-link">
+                      🔗 Проект
                     </a>
-                  </td>
-                  <td className="reviews-td">
-                    <Link to={`/reviews/${review.id}`} className="link-accent">
+                    <Link to={`/reviews/${review.id}`} className="review-more-link">
                       Подробнее
                     </Link>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-          {reviews.length === 0 && <div className="reviews-empty">Нет отзывов</div>}
-        </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

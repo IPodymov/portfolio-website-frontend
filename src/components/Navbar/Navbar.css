@@ -41,6 +41,12 @@
   align-items: center;
 }
 
+.navbar-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
 .navbar-logout-btn {
   background: transparent;
   border: 1px solid white;

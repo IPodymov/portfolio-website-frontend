@@ -16,7 +16,7 @@ const Login: React.FC = () => {
       const data = await authApi.login({ email, password });
       login(data.token, data.user);
       navigate('/');
-    } catch (err) {
+    } catch {
       setError('Ошибка входа. Проверьте данные.');
     }
   };

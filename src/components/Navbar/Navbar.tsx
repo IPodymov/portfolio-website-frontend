@@ -50,11 +50,19 @@ const Navbar: React.FC = () => {
 
       <div className="navbar-auth">
         {isAuthenticated ? (
-          <button
-            onClick={handleLogout}
-            className="btn navbar-logout-btn">
-            Выйти
-          </button>
+          <div className="navbar-user-actions">
+            <NavLink 
+              to="/profile" 
+              className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
+            >
+              Профиль
+            </NavLink>
+            <button
+              onClick={handleLogout}
+              className="btn navbar-logout-btn">
+              Выйти
+            </button>
+          </div>
         ) : (
           <div className="navbar-auth-links">
             <Link to="/login" className="navbar-link">
