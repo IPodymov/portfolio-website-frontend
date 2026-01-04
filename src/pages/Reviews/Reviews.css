@@ -1,6 +1,6 @@
 .reviews-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
 }
@@ -96,6 +96,12 @@
 
 .review-more-link:hover {
   background-color: #e9ecef;
+}
+
+@media (max-width: 480px) {
+  .reviews-container {
+    grid-template-columns: 1fr;
+  }
 }
 
 .reviews-empty {

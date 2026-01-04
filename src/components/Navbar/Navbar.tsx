@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -9,6 +9,7 @@ import './Navbar.css';
 const Navbar: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
@@ -36,25 +37,31 @@ const Navbar: React.FC = () => {
         </IconButton>
       </div>
       <List>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton 
-              component={NavLink} 
-              to={item.path}
-              onClick={handleDrawerToggle}
-              className={({ isActive }: { isActive: boolean }) => isActive ? "drawer-link active" : "drawer-link"}
-            >
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {menuItems.map((item) => {
+          const isActive = item.path === '/' 
+            ? location.pathname === '/' 
+            : location.pathname.startsWith(item.path);
+            
+          return (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton 
+                component={Link} 
+                to={item.path}
+                onClick={handleDrawerToggle}
+                className={isActive ? "drawer-link active" : "drawer-link"}
+              >
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
         {isAuthenticated && (
           <ListItem disablePadding>
             <ListItemButton 
-              component={NavLink} 
+              component={Link} 
               to="/profile"
               onClick={handleDrawerToggle}
-              className={({ isActive }: { isActive: boolean }) => isActive ? "drawer-link active" : "drawer-link"}
+              className={location.pathname.startsWith('/profile') ? "drawer-link active" : "drawer-link"}
             >
               <ListItemText primary="Профиль" />
             </ListItemButton>
