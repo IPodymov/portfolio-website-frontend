@@ -337,7 +337,7 @@
   .hero-title {
     font-size: 2rem;
   }
-  
+
   .hero-subtitle {
     font-size: 1.25rem;
   }
@@ -346,12 +346,12 @@
   .projects-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .btn-lg {
     width: 100%;
     margin-bottom: 0.5rem;
   }
-  
+
   .hero-actions {
     flex-direction: column;
     width: 100%;

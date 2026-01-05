@@ -26,7 +26,10 @@ const Order: React.FC = () => {
       <div className="text-center" style={{ padding: '2rem' }}>
         <h2 className="form-success">Заявка успешно отправлена!</h2>
         <p>Я свяжусь с вами в ближайшее время.</p>
-        <button onClick={() => setStatus('idle')} className="btn btn-primary" style={{ marginTop: '1rem' }}>
+        <button
+          onClick={() => setStatus('idle')}
+          className="btn btn-primary"
+          style={{ marginTop: '1rem' }}>
           Отправить еще одну
         </button>
       </div>
@@ -37,9 +40,7 @@ const Order: React.FC = () => {
     <div className="container-md">
       <h1 className="mb-2">Заказать разработку ПО</h1>
       <div className="card">
-        {status === 'error' && (
-          <div className="form-error">Ошибка отправки. Попробуйте позже.</div>
-        )}
+        {status === 'error' && <div className="form-error">Ошибка отправки. Попробуйте позже.</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Ваше имя</label>
