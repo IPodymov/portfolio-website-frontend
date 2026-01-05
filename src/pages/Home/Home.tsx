@@ -21,11 +21,31 @@ const Home: React.FC = () => {
           githubApi.getRepos(),
         ]);
         setUser(userData);
-        // Sort repos by stars and take top 3
-        const sortedRepos = reposData
-          .sort((a, b) => b.stargazers_count - a.stargazers_count)
-          .slice(0, 3);
-        setRepos(sortedRepos);
+
+        const targetRepoNames = [
+          'visuliser-backend', 
+          'pd-projects-backend',
+          'visualizer-front',
+          'pd-projects-frontend',
+          'fakegram-frontend'
+        ];
+        const customDescriptions: Record<string, string> = {
+          'visuliser-backend': 'Веб-приложение для визуализации и сравнения образовательных программ. Реализовано на Django + DRF. Поддерживает парсинг Excel, анализ компетенций и сравнение планов.',
+          'pd-projects-backend': 'Бэкенд для системы управления проектами на NestJS и PostgreSQL. Реализована JWT авторизация, ролевая модель пользователей, управление учебными заведениями и фильтрация проектов.',
+          'visualizer-front': 'Клиентская часть системы визуализации образовательных программ. Разработана на Vue.js. Обеспечивает интерфейс для загрузки планов и просмотра аналитики.',
+          'pd-projects-frontend': 'Frontend для системы управления проектами. Написан на Vue.js. Реализует интерфейсы для студентов, преподавателей и администраторов.',
+          'fakegram-frontend': 'Instagram-клон на React + TypeScript + Redux Toolkit. Реализованы лента постов, истории, лайки, комментарии и профили пользователей.',
+          'portfolio-website-frontend': 'Этот сайт-портфолио. Разработан на React + Vite + TypeScript с использованием Material UI и адаптивной верстки.'
+        };
+
+        const filteredRepos = reposData.filter(repo => targetRepoNames.includes(repo.name));
+        
+        const displayRepos = filteredRepos.map(repo => ({
+          ...repo,
+          description: customDescriptions[repo.name] || repo.description
+        }));
+
+        setRepos(displayRepos);
       } catch (error) {
         console.error('Error fetching GitHub data:', error);
       } finally {

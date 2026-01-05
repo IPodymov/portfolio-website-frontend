@@ -123,8 +123,9 @@
 }
 
 .projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 2rem;
   margin-bottom: 2rem;
 }
@@ -136,7 +137,10 @@
   border: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 380px;
+  flex: 1 1 300px;
+  max-width: 380px;
+  width: 100%;
 }
 
 .project-header {
@@ -165,6 +169,10 @@
   margin-bottom: 1.5rem;
   flex-grow: 1;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .project-footer {
