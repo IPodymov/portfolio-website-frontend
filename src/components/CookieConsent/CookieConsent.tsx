@@ -1,15 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './CookieConsent.css';
 
 const CookieConsent: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const consent = localStorage.getItem('cookieConsent');
-    if (!consent) {
-      setIsVisible(true);
-    }
-  }, []);
+  const [isVisible, setIsVisible] = useState(() => {
+    return !localStorage.getItem('cookieConsent');
+  });
 
   const handleAccept = () => {
     localStorage.setItem('cookieConsent', 'true');

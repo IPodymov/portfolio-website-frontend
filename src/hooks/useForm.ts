@@ -19,7 +19,7 @@ interface UseFormReturn<T> {
   setSubmitError: (error: string) => void;
 }
 
-export function useForm<T extends Record<string, any>>({
+export function useForm<T extends Record<string, unknown>>({
   initialValues,
   onSubmit,
   validate,
@@ -62,8 +62,9 @@ export function useForm<T extends Record<string, any>>({
     try {
       await onSubmit(values);
       setSubmitSuccess(true);
-    } catch (error: any) {
-      setSubmitError(error.message || 'Произошла ошибка');
+    } catch (error: unknown) {
+      const err = error as Error;
+      setSubmitError(err.message || 'Произошла ошибка');
     } finally {
       setIsSubmitting(false);
     }

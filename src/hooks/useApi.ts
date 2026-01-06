@@ -24,8 +24,9 @@ export function useApi<T>({ fetchFn, immediate = true }: UseApiOptions<T>): UseA
     try {
       const result = await fetchFn();
       setData(result);
-    } catch (err: any) {
-      setError(err.message || 'Произошла ошибка при загрузке данных');
+    } catch (err: unknown) {
+      const error = err as Error;
+      setError(error.message || 'Произошла ошибка при загрузке данных');
       setData(null);
     } finally {
       setLoading(false);

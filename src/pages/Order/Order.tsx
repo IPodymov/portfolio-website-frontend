@@ -17,16 +17,18 @@ const Order: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
     setError('');
-    
+
     try {
       if (isAuthenticated) {
         await projectsApi.create(formData);
@@ -34,15 +36,18 @@ const Order: React.FC = () => {
         await contactApi.sendMessage({
           name: formData.name,
           telegram: formData.telegram,
-          message: `Тип проекта: ${PROJECT_TYPE_OPTIONS.find(o => o.value === formData.type)?.label}\n\nОписание: ${formData.description}`
+          message: `Тип проекта: ${
+            PROJECT_TYPE_OPTIONS.find((o) => o.value === formData.type)?.label
+          }\n\nОписание: ${formData.description}`,
         });
       }
       setStatus('success');
       setFormData({ name: '', telegram: '', description: '', type: ProjectType.LANDING });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setStatus('error');
-      setError(err.response?.data?.message || 'Ошибка отправки');
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      setError(error.response?.data?.message || error.message || 'Ошибка отправки');
     }
   };
 
@@ -52,9 +57,7 @@ const Order: React.FC = () => {
         <div className="order-success__card card">
           <h2 className="order-success__title">Заявка успешно отправлена!</h2>
           <p className="order-success__text">Я свяжусь с вами в ближайшее время.</p>
-          <button
-            onClick={() => setStatus('idle')}
-            className="btn btn-primary">
+          <button onClick={() => setStatus('idle')} className="btn btn-primary">
             Отправить еще одну
           </button>
         </div>
@@ -100,9 +103,8 @@ const Order: React.FC = () => {
               value={formData.type}
               onChange={handleChange}
               className="form-control"
-              disabled={status === 'loading'}
-            >
-              {PROJECT_TYPE_OPTIONS.map(option => (
+              disabled={status === 'loading'}>
+              {PROJECT_TYPE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -122,7 +124,10 @@ const Order: React.FC = () => {
               disabled={status === 'loading'}
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>
+          <button
+            type="submit"
+            className="btn btn-primary btn-block"
+            disabled={status === 'loading'}>
             {status === 'loading' ? 'Отправка...' : 'Отправить заявку'}
           </button>
         </form>
