@@ -19,14 +19,14 @@ const CookieConsent: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="cookie-consent-container">
-      <div className="cookie-consent-content">
-        <p>
+    <div className="cookie-consent">
+      <div className="cookie-consent__content">
+        <p className="cookie-consent__text">
           Мы используем файлы cookie для улучшения работы сайта и анализа трафика. 
           Продолжая использовать сайт, вы соглашаетесь с нашей{' '}
-          <a href="/privacy" className="cookie-link">Политикой конфиденциальности</a>.
+          <a href="/privacy" className="cookie-consent__link">Политикой конфиденциальности</a>.
         </p>
-        <button onClick={handleAccept} className="btn btn-primary cookie-btn">
+        <button onClick={handleAccept} className="btn btn-primary cookie-consent__button">
           Хорошо
         </button>
       </div>

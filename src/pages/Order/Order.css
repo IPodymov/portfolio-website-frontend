@@ -1,0 +1,39 @@
+.order-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.order-page__title {
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.order-page__card {
+  margin-bottom: 2rem;
+}
+
+.order-success {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  padding: 2rem;
+}
+
+.order-success__card {
+  text-align: center;
+  max-width: 400px;
+}
+
+.order-success__title {
+  color: #065f46;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.order-success__text {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}

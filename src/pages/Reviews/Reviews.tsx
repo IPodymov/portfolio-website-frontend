@@ -1,36 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { reviewsApi } from '../../api/reviews';
-import type { Review } from '../../types';
+import type { Review, CreateReviewRequest } from '../../types';
+import { ServiceQuality } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import StarIcon from '@mui/icons-material/Star';
+import { StarRating } from '../../components/StarRating';
+import { LoadingSpinner } from '../../components/LoadingSpinner';
+import { SERVICE_QUALITY_OPTIONS, SERVICE_QUALITY_LABELS } from '../../constants';
 import './Reviews.css';
 
 const Reviews: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const { isAuthenticated, user } = useAuth();
-
-  // Form state
-  const [newReview, setNewReview] = useState({
+  const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState<CreateReviewRequest>({
     body: '',
     projectLink: '',
     rating: 5,
-    serviceQuality: 'Отлично',
+    serviceQuality: ServiceQuality.EXCELLENT
   });
-  const [hoverRating, setHoverRating] = useState(0);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitting, setSubmitting] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    fetchReviews();
+    loadReviews();
   }, []);
 
-  const fetchReviews = async () => {
+  const loadReviews = async () => {
     try {
       const data = await reviewsApi.getAll();
       setReviews(data);
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
+    } catch {
+      setError('Не удалось загрузить отзывы');
     } finally {
       setLoading(false);
     }
@@ -38,161 +40,127 @@ const Reviews: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-
+    setSubmitting(true);
+    
     try {
-      await reviewsApi.create({
-        username: user.firstName ? `${user.firstName} ${user.lastName || ''}` : user.email,
-        body: newReview.body,
-        projectLink: newReview.projectLink,
-        rating: newReview.rating,
-        serviceQuality: newReview.serviceQuality,
+      const newReview = await reviewsApi.create(formData);
+      setReviews([newReview, ...reviews]);
+      setShowForm(false);
+      setFormData({
+        body: '',
+        projectLink: '',
+        rating: 5,
+        serviceQuality: ServiceQuality.EXCELLENT
       });
-      setSubmitStatus('success');
-      setNewReview({ body: '', projectLink: '', rating: 5, serviceQuality: 'Отлично' });
-      fetchReviews(); // Refresh list
     } catch {
-      setSubmitStatus('error');
+      setError('Не удалось отправить отзыв');
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
   return (
-    <div>
-      <h1 className="mb-2">Отзывы</h1>
+    <div className="container">
+      <div className="reviews__header">
+        <h1 className="reviews__title">Отзывы клиентов</h1>
+        {isAuthenticated && (
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowForm(!showForm)}
+          >
+            {showForm ? 'Отмена' : 'Оставить отзыв'}
+          </button>
+        )}
+      </div>
 
-      {/* Add Review Form */}
-      {isAuthenticated ? (
-        <div className="card mb-3">
-          <h3>Оставить отзыв</h3>
-          {submitStatus === 'success' && <div className="form-success">Отзыв добавлен!</div>}
-          {submitStatus === 'error' && <div className="form-error">Ошибка добавления.</div>}
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Оценка</label>
-              <div
-                style={{ display: 'flex', gap: '0.25rem', cursor: 'pointer' }}
-                onMouseLeave={() => setHoverRating(0)}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <StarIcon
-                    key={star}
-                    onClick={() => setNewReview({ ...newReview, rating: star })}
-                    onMouseEnter={() => setHoverRating(star)}
-                    style={{
-                      color: star <= (hoverRating || newReview.rating) ? '#FFD700' : '#ccc',
-                      transition: 'color 0.2s',
-                      fontSize: '2rem'
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Качество обслуживания</label>
-              <select
-                value={newReview.serviceQuality}
-                onChange={(e) => setNewReview({ ...newReview, serviceQuality: e.target.value })}
-                className="form-control">
-                <option value="Отлично">Отлично</option>
-                <option value="Хорошо">Хорошо</option>
-                <option value="Нормально">Нормально</option>
-                <option value="Плохо">Плохо</option>
-                <option value="Ужасно">Ужасно</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Отзыв</label>
-              <textarea
-                value={newReview.body}
-                onChange={(e) => setNewReview({ ...newReview, body: e.target.value })}
-                required
-                rows={3}
-                className="form-control"
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Ссылка на проект</label>
-              <input
-                type="url"
-                value={newReview.projectLink}
-                onChange={(e) => setNewReview({ ...newReview, projectLink: e.target.value })}
-                required
-                placeholder="https://example.com"
-                className="form-control"
-              />
-            </div>
-            <button type="submit" className="btn btn-primary">
-              Отправить
-            </button>
-          </form>
-        </div>
-      ) : (
-        <div
-          className="mb-2"
-          style={{ padding: '1rem', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-          <Link to="/login" className="link-accent">
-            Войдите
-          </Link>
-          , чтобы оставить отзыв.
-        </div>
-      )}
-      {/* Reviews Grid */}
-      {loading ? (
-        <div className="text-center py-5">Загрузка...</div>
-      ) : (
-        <>
-          {reviews.length === 0 ? (
-            <div className="reviews-empty">Нет отзывов</div>
-          ) : (
-            <div className="reviews-container">
-              {reviews.map((review) => (
-                <div key={review.id} className="review-card">
-                  <div className="review-header">
-                    <span className="review-author">{review.username}</span>
-                    {review.createdAt && (
-                      <span className="review-date">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
+      {error && <div className="form-error">{error}</div>}
 
-                  <div className="review-rating">
-                    {[...Array(5)].map((_, i) => (
-                      <StarIcon 
-                        key={i} 
-                        style={{ 
-                          color: i < (review.rating || 0) ? '#FFD700' : '#e0e0e0',
-                          fontSize: '1.2rem'
-                        }} 
-                      />
-                    ))}
-                  </div>
-
-                  {review.serviceQuality && (
-                    <div className="review-quality">Качество: {review.serviceQuality}</div>
-                  )}
-
-                  <div className="review-body">
-                    {review.body.length > 150 ? `${review.body.substring(0, 150)}...` : review.body}
-                  </div>
-
-                  <div className="review-footer">
-                    <a
-                      href={review.projectLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="review-project-link">
-                      🔗 Проект
-                    </a>
-                    <Link to={`/reviews/${review.id}`} className="review-more-link">
-                      Подробнее
-                    </Link>
-                  </div>
-                </div>
+      {showForm && (
+        <form onSubmit={handleSubmit} className="reviews__form card">
+          <div className="form-group">
+            <label className="form-label">Ваша оценка</label>
+            <StarRating 
+              rating={formData.rating} 
+              interactive 
+              onChange={(rating) => setFormData(prev => ({ ...prev, rating }))}
+              size="lg"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Качество обслуживания</label>
+            <select
+              value={formData.serviceQuality}
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                serviceQuality: e.target.value as ServiceQuality
+              }))}
+              className="form-control"
+            >
+              {SERVICE_QUALITY_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
-            </div>
-          )}
-        </>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Ссылка на проект (опционально)</label>
+            <input
+              type="url"
+              value={formData.projectLink}
+              onChange={(e) => setFormData(prev => ({ ...prev, projectLink: e.target.value }))}
+              className="form-control"
+              placeholder="https://example.com"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Ваш отзыв</label>
+            <textarea
+              value={formData.body}
+              onChange={(e) => setFormData(prev => ({ ...prev, body: e.target.value }))}
+              required
+              className="form-control"
+              rows={4}
+              placeholder="Расскажите о вашем опыте..."
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? 'Отправка...' : 'Отправить отзыв'}
+          </button>
+        </form>
       )}
+
+      <div className="reviews__list">
+        {reviews.length === 0 ? (
+          <p className="text-center">Отзывов пока нет</p>
+        ) : (
+          reviews.map((review) => (
+            <Link to={`/reviews/${review.id}`} key={review.id} className="reviews__card card">
+              <div className="reviews__card-header">
+                <div className="reviews__card-author">
+                  {review.username || `${review.user?.firstName || ''} ${review.user?.lastName || ''}`.trim() || 'Аноним'}
+                </div>
+                <StarRating rating={review.rating} />
+              </div>
+              <p className="reviews__card-body">{review.body}</p>
+              <div className="reviews__card-footer">
+                <span className="reviews__card-quality">
+                  {SERVICE_QUALITY_LABELS[review.serviceQuality as ServiceQuality] || review.serviceQuality}
+                </span>
+                <span className="reviews__card-date">
+                  {new Date(review.createdAt).toLocaleDateString('ru-RU')}
+                </span>
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
     </div>
   );
 };

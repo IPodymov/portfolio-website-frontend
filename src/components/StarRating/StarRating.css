@@ -1,0 +1,42 @@
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.star-rating--sm svg {
+  font-size: 1rem;
+}
+
+.star-rating--md svg {
+  font-size: 1.25rem;
+}
+
+.star-rating--lg svg {
+  font-size: 1.5rem;
+}
+
+.star-rating__btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+}
+
+.star-rating__btn:hover {
+  color: #f59e0b;
+}
+
+.star-rating__star {
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+}
+
+.star-rating__star svg,
+.star-rating__btn svg {
+  color: inherit;
+}

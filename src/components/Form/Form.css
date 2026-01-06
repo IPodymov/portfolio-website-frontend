@@ -1,0 +1,10 @@
+.form-control--error {
+  border-color: #dc2626;
+}
+
+.form-field-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}

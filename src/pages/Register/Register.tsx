@@ -1,77 +1,117 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../api/auth';
+import './Register.css';
 
 const Register: React.FC = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    telegram: ''
+  });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+    
     try {
-      const data = await authApi.register({ firstName, lastName, email, password });
-      login(data.token, data.user);
+      const user = await authApi.register(formData);
+      login(user);
       navigate('/');
     } catch {
       setError('Ошибка регистрации. Возможно email уже занят.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container-sm card">
-      <h2 className="text-center mb-3">Регистрация</h2>
-      {error && <div className="form-error">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label">Имя</label>
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-            className="form-control"
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Фамилия</label>
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-            className="form-control"
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="form-control"
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Пароль</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="form-control"
-          />
-        </div>
-        <button type="submit" className="btn btn-primary btn-block">
-          Зарегистрироваться
-        </button>
-      </form>
+    <div className="auth-page">
+      <div className="auth-card card">
+        <h2 className="auth-title">Регистрация</h2>
+        {error && <div className="form-error">{error}</div>}
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label">Имя</label>
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              required
+              className="form-control"
+              disabled={loading}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Фамилия</label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              required
+              className="form-control"
+              disabled={loading}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="form-control"
+              disabled={loading}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Telegram (опционально)</label>
+            <input
+              type="text"
+              name="telegram"
+              value={formData.telegram}
+              onChange={handleChange}
+              placeholder="@username"
+              className="form-control"
+              disabled={loading}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Пароль</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="form-control"
+              disabled={loading}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+          </button>
+        </form>
+        <p className="auth-footer">
+          Уже есть аккаунт? <Link to="/login" className="link-accent">Войти</Link>
+        </p>
+      </div>
     </div>
   );
 };

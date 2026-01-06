@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -18,3 +18,18 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 401 errors - unauthorized
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      // Optionally redirect to login
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;

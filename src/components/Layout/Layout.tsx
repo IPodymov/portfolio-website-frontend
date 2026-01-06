@@ -6,15 +6,15 @@ import './Layout.css';
 
 const Layout: React.FC = () => {
   return (
-    <div className="layout-container">
+    <div className="layout">
       <Navbar />
-      <main className="layout-main">
+      <main className="layout__main">
         <Outlet />
       </main>
-      <footer className="layout-footer">
-        <div className="footer-content">
+      <footer className="layout__footer">
+        <div className="layout__footer-content">
           <p>&copy; {new Date().getFullYear()} Ivan Podymov. All rights reserved.</p>
-          <Link to="/privacy" className="footer-link">Политика конфиденциальности</Link>
+          <Link to="/privacy" className="layout__footer-link">Политика конфиденциальности</Link>
         </div>
       </footer>
       <CookieConsent />

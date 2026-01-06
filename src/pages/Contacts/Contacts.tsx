@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import EmailIcon from '@mui/icons-material/Email';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import { contactApi } from '../../api/contact';
 import './Contacts.css';
 
 const Contacts: React.FC = () => {
@@ -10,23 +11,29 @@ const Contacts: React.FC = () => {
     telegram: '',
     message: '',
   });
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Form submitted:', formData);
+    setError('');
+
+    try {
+      await contactApi.sendMessage(formData);
       setStatus('success');
       setFormData({ name: '', telegram: '', message: '' });
       setTimeout(() => setStatus('idle'), 3000);
-    }, 1000);
+    } catch (err: unknown) {
+      setStatus('error');
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Ошибка отправки. Попробуйте позже.');
+    }
   };
 
   return (
@@ -34,15 +41,17 @@ const Contacts: React.FC = () => {
       <div className="contacts-header">
         <h1 className="section-title">Свяжитесь со мной</h1>
         <p className="contacts-subtitle">
-          Есть идея проекта или предложение о работе? Напишите мне, и мы обсудим детали.
-          Я всегда открыт к новым возможностям и интересному сотрудничеству.
+          Есть идея проекта или предложение о работе? Напишите мне, и мы обсудим детали. Я всегда
+          открыт к новым возможностям и интересному сотрудничеству.
         </p>
       </div>
 
       <div className="contacts-content">
         <div className="contacts-info">
           <div className="contact-card">
-            <div className="contact-icon"><EmailIcon fontSize="inherit" /></div>
+            <div className="contact-icon">
+              <EmailIcon fontSize="inherit" />
+            </div>
             <h3>Email</h3>
             <p>Пишите в любое время</p>
             <a href="mailto:podymovv55@gmail.com" className="contact-link">
@@ -51,7 +60,9 @@ const Contacts: React.FC = () => {
           </div>
 
           <div className="contact-card">
-            <div className="contact-icon"><TelegramIcon fontSize="inherit" /></div>
+            <div className="contact-icon">
+              <TelegramIcon fontSize="inherit" />
+            </div>
             <h3>Telegram</h3>
             <p>Быстрая связь в мессенджере</p>
             <a
@@ -64,7 +75,9 @@ const Contacts: React.FC = () => {
           </div>
 
           <div className="contact-card">
-            <div className="contact-icon"><GitHubIcon fontSize="inherit" /></div>
+            <div className="contact-icon">
+              <GitHubIcon fontSize="inherit" />
+            </div>
             <h3>GitHub</h3>
             <p>Посмотрите мой код</p>
             <a
@@ -127,10 +140,10 @@ const Contacts: React.FC = () => {
             </button>
 
             {status === 'success' && (
-              <div className="success-message">
-                Спасибо! Ваше сообщение отправлено.
-              </div>
+              <div className="success-message">Спасибо! Ваше сообщение отправлено.</div>
             )}
+
+            {status === 'error' && <div className="error-message">{error}</div>}
           </form>
         </div>
       </div>

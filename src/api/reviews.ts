@@ -1,22 +1,27 @@
 import { api } from './axios';
-import type { Review } from '../types';
+import type { Review, CreateReviewRequest } from '../types';
 
 export const reviewsApi = {
-  getAll: async () => {
+  getAll: async (): Promise<Review[]> => {
     const response = await api.get<Review[]>('/reviews');
     return response.data;
   },
-  getById: async (id: number) => {
-    // Backend doesn't support GET /reviews/:id yet, so we fetch all and filter
-    const response = await api.get<Review[]>('/reviews');
-    const review = response.data.find((r) => r.id === id);
-    if (!review) {
-      throw new Error('Review not found');
-    }
-    return review;
+
+  getById: async (id: number): Promise<Review> => {
+    const response = await api.get<Review>(`/reviews/${id}`);
+    return response.data;
   },
-  create: async (data: Omit<Review, 'id' | 'createdAt'>) => {
+
+  create: async (data: CreateReviewRequest): Promise<Review> => {
     const response = await api.post<Review>('/reviews', data);
     return response.data;
   },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/reviews/${id}`);
+  },
 };
+
+// Re-export for backwards compatibility
+export type { CreateReviewRequest as CreateReviewData } from '../types';
+

@@ -10,6 +10,7 @@ import Reviews from './pages/Reviews/Reviews';
 import ReviewDetail from './pages/ReviewDetail/ReviewDetail';
 import Profile from './pages/Profile/Profile';
 import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
+import AdminPanel from './pages/Admin/AdminPanel';
 import './App.css';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
             <Route path="reviews" element={<Reviews />} />
             <Route path="reviews/:id" element={<ReviewDetail />} />
             <Route path="privacy" element={<PrivacyPolicy />} />
+            <Route path="admin" element={<AdminPanel />} />
           </Route>
         </Routes>
       </Router>

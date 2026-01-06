@@ -1,10 +1,10 @@
-.layout-container {
+.layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.layout-main {
+.layout__main {
   flex: 1;
   padding: 2rem;
   max-width: 1200px;
@@ -12,14 +12,14 @@
   width: 100%;
 }
 
-.layout-footer {
+.layout__footer {
   background-color: var(--color-primary);
   color: white;
   padding: 1.5rem;
   margin-top: auto;
 }
 
-.footer-content {
+.layout__footer-content {
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
@@ -29,20 +29,20 @@
   gap: 1rem;
 }
 
-.footer-link {
+.layout__footer-link {
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.2s;
 }
 
-.footer-link:hover {
+.layout__footer-link:hover {
   color: white;
   text-decoration: underline;
 }
 
 @media (max-width: 600px) {
-  .footer-content {
+  .layout__footer-content {
     flex-direction: column;
     text-align: center;
   }

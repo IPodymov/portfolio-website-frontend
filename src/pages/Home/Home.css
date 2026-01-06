@@ -1,28 +1,27 @@
-/* Home Container */
-.home-container {
+.home {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
 
-/* Hero Section */
-.hero-section {
+/* Hero */
+.home__hero {
   padding: 4rem 0;
   margin-bottom: 4rem;
 }
 
-.hero-content {
+.home__hero-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 4rem;
 }
 
-.hero-text {
+.home__hero-text {
   flex: 1;
 }
 
-.hero-title {
+.home__hero-title {
   font-size: 3.5rem;
   font-weight: 800;
   line-height: 1.2;
@@ -30,18 +29,18 @@
   color: var(--color-text);
 }
 
-.text-accent {
+.home__text-accent {
   color: var(--color-primary);
 }
 
-.hero-subtitle {
+.home__hero-subtitle {
   font-size: 1.5rem;
   color: #6b7280;
   margin-bottom: 1.5rem;
   font-weight: 500;
 }
 
-.hero-uvp {
+.home__hero-uvp {
   font-size: 1.125rem;
   line-height: 1.7;
   color: #4b5563;
@@ -49,18 +48,18 @@
   max-width: 600px;
 }
 
-.hero-actions {
+.home__hero-actions {
   display: flex;
   gap: 1rem;
 }
 
-.hero-image {
+.home__hero-image {
   flex: 1;
   display: flex;
   justify-content: center;
 }
 
-.avatar-large {
+.home__avatar {
   width: 300px;
   height: 300px;
   border-radius: 50%;
@@ -69,8 +68,8 @@
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* Skills Section */
-.skills-section {
+/* Skills */
+.home__skills {
   margin-bottom: 6rem;
 }
 
@@ -82,7 +81,7 @@
   color: var(--color-text);
 }
 
-.skills-grid {
+.home__skills-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 2rem;
@@ -101,28 +100,28 @@
   transform: translateY(-5px);
 }
 
-.skill-icon {
+.skill-card__icon {
   font-size: 3rem;
   margin-bottom: 1rem;
 }
 
-.skill-card h3 {
+.skill-card__title {
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
   color: var(--color-text);
 }
 
-.skill-card p {
+.skill-card__description {
   color: #6b7280;
   line-height: 1.5;
 }
 
-/* Projects Section */
-.projects-section {
+/* Projects */
+.home__projects {
   margin-bottom: 6rem;
 }
 
-.projects-grid {
+.home__projects-grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -143,20 +142,20 @@
   width: 100%;
 }
 
-.project-header {
+.project-card__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.project-header h3 {
+.project-card__title {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
 }
 
-.project-lang {
+.project-card__lang {
   font-size: 0.875rem;
   color: var(--color-primary);
   background: rgba(var(--color-primary-rgb), 0.1);
@@ -164,7 +163,7 @@
   border-radius: 9999px;
 }
 
-.project-desc {
+.project-card__description {
   color: #4b5563;
   margin-bottom: 1.5rem;
   flex-grow: 1;
@@ -175,7 +174,7 @@
   overflow: hidden;
 }
 
-.project-footer {
+.project-card__footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -194,7 +193,7 @@
 }
 
 /* Reviews Teaser */
-.reviews-teaser-section {
+.home__reviews-teaser {
   background: var(--color-primary);
   color: white;
   padding: 4rem 2rem;
@@ -203,51 +202,58 @@
   margin-bottom: 6rem;
 }
 
-.reviews-teaser-content h2 {
+.home__reviews-title {
   font-size: 2rem;
   margin-bottom: 1rem;
   color: white;
 }
 
-.reviews-teaser-content p {
+.home__reviews-text {
   font-size: 1.125rem;
   margin-bottom: 2rem;
   opacity: 0.9;
 }
 
-.reviews-teaser-content .btn-primary {
+.home__reviews-button {
   background: white;
   color: var(--color-primary);
   border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-block;
+  transition: background-color 0.2s;
 }
 
-.reviews-teaser-content .btn-primary:hover {
+.home__reviews-button:hover {
   background: #f9fafb;
 }
 
 /* Quick Contact */
-.quick-contact-section {
+.home__quick-contact {
   text-align: center;
   margin-bottom: 4rem;
 }
 
-.quick-contact-section h2 {
+.home__contact-title {
   font-size: 2rem;
   margin-bottom: 1rem;
 }
 
-.quick-contact-section p {
+.home__contact-text {
   color: #6b7280;
   margin-bottom: 2rem;
 }
 
-.contact-links {
+.home__contact-links {
   display: flex;
   justify-content: center;
   gap: 2rem;
 }
 
-.contact-link {
+.home__contact-link {
   font-size: 1.125rem;
   color: var(--color-text);
   text-decoration: none;
@@ -257,102 +263,52 @@
   transition: background-color 0.2s;
 }
 
-.contact-link:hover {
+.home__contact-link:hover {
   background-color: #f3f4f6;
-}
-
-/* Utilities */
-.btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.btn-lg {
-  padding: 1rem 2rem;
-  font-size: 1.125rem;
-}
-
-.btn-primary {
-  background-color: var(--color-primary);
-  color: white;
-  border: 1px solid var(--color-primary);
-}
-
-.btn-primary:hover {
-  background-color: var(--color-primary-dark);
-}
-
-.btn-outline {
-  background-color: transparent;
-  color: var(--color-text);
-  border: 1px solid #d1d5db;
-}
-
-.btn-outline:hover {
-  border-color: var(--color-text);
-  background-color: #f9fafb;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.mt-3 {
-  margin-top: 1.5rem;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .hero-content {
+  .home__hero-content {
     flex-direction: column-reverse;
     text-align: center;
     gap: 2rem;
   }
 
-  .hero-title {
+  .home__hero-title {
     font-size: 2.5rem;
   }
 
-  .hero-actions {
+  .home__hero-actions {
     justify-content: center;
   }
 
-  .avatar-large {
+  .home__avatar {
     width: 200px;
     height: 200px;
   }
 
-  .contact-links {
+  .home__contact-links {
     flex-direction: column;
     gap: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .hero-title {
+  .home__hero-title {
     font-size: 2rem;
   }
 
-  .hero-subtitle {
+  .home__hero-subtitle {
     font-size: 1.25rem;
   }
 
-  .skills-grid,
-  .projects-grid {
+  .home__skills-list,
+  .home__projects-grid {
     grid-template-columns: 1fr;
   }
 
-  .btn-lg {
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
-
-  .hero-actions {
+  .home__hero-actions {
     flex-direction: column;
     width: 100%;
   }

@@ -1,13 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { User } from '../types';
+import { UserRole } from '../types';
 import { authApi } from '../api/auth';
 
 interface AuthContextType {
   user: User | null;
-  login: (token: string, user: User) => void;
+  login: (user: User) => void;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
+  isModerator: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,31 +20,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    authApi
-      .getMe()
-      .then((userData) => setUser(userData))
-      .catch(() => {
-        localStorage.removeItem('token');
-        setUser(null);
-      })
-      .finally(() => setIsLoading(false));
+  const checkAuth = useCallback(async () => {
+    try {
+      const userData = await authApi.getProfile();
+      setUser(userData);
+    } catch {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const login = (token: string, userData: User) => {
-    localStorage.setItem('token', token);
-    setUser(userData);
-  };
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
-  const logout = () => {
+  const login = useCallback((userData: User) => {
+    setUser(userData);
+  }, []);
+
+  const logout = useCallback(() => {
     authApi.logout().finally(() => {
-      localStorage.removeItem('token');
       setUser(null);
     });
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const userData = await authApi.getProfile();
+      setUser(userData);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
+  const value = {
+    user,
+    login,
+    logout,
+    refreshUser,
+    isAuthenticated: !!user,
+    isLoading,
+    isAdmin: user?.role === UserRole.ADMIN,
+    isModerator: user?.role === UserRole.MODERATOR || user?.role === UserRole.ADMIN
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
@@ -48,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

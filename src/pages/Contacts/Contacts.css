@@ -138,6 +138,16 @@
   font-weight: 500;
 }
 
+.error-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .contacts-content {

@@ -1,93 +1,129 @@
 import React, { useState } from 'react';
-import { ordersApi } from '../../api/orders';
+import { useAuth } from '../../context/AuthContext';
+import { projectsApi } from '../../api/projects';
+import { contactApi } from '../../api/contact';
+import { PROJECT_TYPE_OPTIONS } from '../../constants';
+import { ProjectType } from '../../types';
+import './Order.css';
 
 const Order: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     telegram: '',
     description: '',
-    type: 'landing' as const,
+    type: ProjectType.LANDING,
   });
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [error, setError] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setStatus('loading');
+    setError('');
+    
     try {
-      await ordersApi.create(formData);
+      if (isAuthenticated) {
+        await projectsApi.create(formData);
+      } else {
+        await contactApi.sendMessage({
+          name: formData.name,
+          telegram: formData.telegram,
+          message: `Тип проекта: ${PROJECT_TYPE_OPTIONS.find(o => o.value === formData.type)?.label}\n\nОписание: ${formData.description}`
+        });
+      }
       setStatus('success');
-      setFormData({ name: '', telegram: '', description: '', type: 'landing' });
-    } catch (error) {
+      setFormData({ name: '', telegram: '', description: '', type: ProjectType.LANDING });
+    } catch (err: any) {
+      console.error(err);
       setStatus('error');
+      setError(err.response?.data?.message || 'Ошибка отправки');
     }
   };
 
   if (status === 'success') {
     return (
-      <div className="text-center" style={{ padding: '2rem' }}>
-        <h2 className="form-success">Заявка успешно отправлена!</h2>
-        <p>Я свяжусь с вами в ближайшее время.</p>
-        <button
-          onClick={() => setStatus('idle')}
-          className="btn btn-primary"
-          style={{ marginTop: '1rem' }}>
-          Отправить еще одну
-        </button>
+      <div className="order-success">
+        <div className="order-success__card card">
+          <h2 className="order-success__title">Заявка успешно отправлена!</h2>
+          <p className="order-success__text">Я свяжусь с вами в ближайшее время.</p>
+          <button
+            onClick={() => setStatus('idle')}
+            className="btn btn-primary">
+            Отправить еще одну
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container-md">
-      <h1 className="mb-2">Заказать разработку ПО</h1>
-      <div className="card">
-        {status === 'error' && <div className="form-error">Ошибка отправки. Попробуйте позже.</div>}
+    <div className="order-page">
+      <h1 className="order-page__title">Заказать разработку ПО</h1>
+      <div className="order-page__card card">
+        {status === 'error' && <div className="form-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Ваше имя</label>
             <input
               type="text"
+              name="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={handleChange}
               required
               className="form-control"
+              disabled={status === 'loading'}
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Telegram Username</label>
+            <label className="form-label">Telegram для связи</label>
             <input
               type="text"
+              name="telegram"
               value={formData.telegram}
-              onChange={(e) => setFormData({ ...formData, telegram: e.target.value })}
+              onChange={handleChange}
               required
               placeholder="@username"
               className="form-control"
+              disabled={status === 'loading'}
             />
           </div>
           <div className="form-group">
             <label className="form-label">Тип проекта</label>
             <select
+              name="type"
               value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-              className="form-control">
-              <option value="landing">Лендинг</option>
-              <option value="ecommerce">Интернет-магазин</option>
-              <option value="webapp">Веб-приложение</option>
-              <option value="bot">Бот</option>
-              <option value="other">Другое</option>
+              onChange={handleChange}
+              className="form-control"
+              disabled={status === 'loading'}
+            >
+              {PROJECT_TYPE_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Описание задачи</label>
             <textarea
+              name="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={handleChange}
               required
               rows={5}
               className="form-control"
+              placeholder="Опишите основные требования и функционал..."
+              disabled={status === 'loading'}
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-block">
-            Отправить заявку
+          <button type="submit" className="btn btn-primary btn-block" disabled={status === 'loading'}>
+            {status === 'loading' ? 'Отправка...' : 'Отправить заявку'}
           </button>
         </form>
       </div>

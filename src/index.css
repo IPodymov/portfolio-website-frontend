@@ -64,12 +64,14 @@
 :root {
   /* Основной: #0F172A (тёмно-синий / slate) */
   --color-primary: #0f172a;
+  --color-primary-rgb: 15, 23, 42;
   /* Фон: #F8FAFC */
   --color-background: #f8fafc;
   /* Текст: #020617 */
   --color-text: #020617;
   /* Акцент (кнопки): #2563EB (синий) */
   --color-accent: #2563eb;
+  --color-accent-rgb: 37, 99, 235;
 }
 
 * {
@@ -194,4 +196,21 @@ body {
 
 .link-accent:hover {
   text-decoration: underline;
+}
+
+/* Additional Button Sizes */
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-text);
+  border: 1px solid #d1d5db;
+}
+
+.btn-outline:hover {
+  border-color: var(--color-text);
+  background-color: #f9fafb;
 }
