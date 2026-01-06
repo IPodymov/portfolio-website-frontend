@@ -142,6 +142,15 @@ body {
 .form-label {
   display: block;
   margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-hint {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: normal;
+  margin-top: 0.25rem;
 }
 
 .form-control {
@@ -213,4 +222,41 @@ body {
 .btn-outline:hover {
   border-color: var(--color-text);
   background-color: #f9fafb;
+}
+
+/* Global Responsive */
+@media (max-width: 768px) {
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+
+  .btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+  }
+
+  .form-control {
+    padding: 0.625rem 0.75rem;
+    font-size: 1rem;
+  }
+
+  .form-label {
+    font-size: 0.9rem;
+  }
 }

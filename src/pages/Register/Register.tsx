@@ -44,29 +44,31 @@ const Register: React.FC = () => {
         <h2 className="auth-title">Регистрация</h2>
         {error && <div className="form-error">{error}</div>}
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Имя</label>
-            <input
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-              className="form-control"
-              disabled={loading}
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Фамилия</label>
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              className="form-control"
-              disabled={loading}
-            />
+          <div className="auth-form-row">
+            <div className="form-group">
+              <label className="form-label">Имя</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                className="form-control"
+                disabled={loading}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Фамилия</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className="form-control"
+                disabled={loading}
+              />
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">Email</label>
@@ -81,7 +83,10 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Telegram (опционально)</label>
+            <label className="form-label">
+              Telegram
+              <span className="form-hint">(обязательно для отслеживания вашего проекта)</span>
+            </label>
             <input
               type="text"
               name="telegram"
@@ -90,6 +95,7 @@ const Register: React.FC = () => {
               placeholder="@username"
               className="form-control"
               disabled={loading}
+              required
             />
           </div>
           <div className="form-group">

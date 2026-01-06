@@ -1,17 +1,17 @@
 .auth-page {
-  min-height: calc(100vh - 80px);
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+  padding: 1rem;
+  background-color: var(--color-background);
 }
 
 .auth-card {
   background: white;
-  padding: 2.5rem;
+  padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 400px;
 }

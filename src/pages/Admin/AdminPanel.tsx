@@ -112,6 +112,21 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="admin-panel">
+      {/* Mobile Tabs */}
+      <div className="admin-mobile-tabs">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            className={`admin-mobile-tab ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.icon}
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Desktop Sidebar */}
       <div className="admin-sidebar">
         <h2 className="admin-sidebar__title">Админ панель</h2>
         <nav className="admin-sidebar__nav">

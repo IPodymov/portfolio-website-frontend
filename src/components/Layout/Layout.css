@@ -12,6 +12,25 @@
   width: 100%;
 }
 
+/* Auth pages should fill available space */
+.layout__main:has(.auth-page) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  max-width: 100%;
+}
+
+/* Admin panel - full width, no footer */
+.layout__main:has(.admin-panel) {
+  padding: 2rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.layout:has(.admin-panel) .layout__footer {
+  display: none;
+}
+
 .layout__footer {
   background-color: var(--color-primary);
   color: white;
@@ -45,5 +64,13 @@
   .layout__footer-content {
     flex-direction: column;
     text-align: center;
+  }
+
+  .layout__footer {
+    padding: 1rem;
+  }
+
+  .layout__main {
+    padding: 1rem;
   }
 }
