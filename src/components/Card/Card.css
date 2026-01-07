@@ -81,3 +81,22 @@
   color: var(--color-text);
   margin: 0;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card--padding-xl {
+    padding: var(--space-lg);
+  }
+  
+  .card--padding-lg {
+    padding: var(--space-md);
+  }
+  
+  .card__header,
+  .card__footer {
+    padding-top: var(--space-md);
+    padding-bottom: var(--space-md);
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+}

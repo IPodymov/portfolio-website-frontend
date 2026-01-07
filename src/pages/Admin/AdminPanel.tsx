@@ -378,13 +378,13 @@ const AdminPanel: React.FC = observer(() => {
                     <tbody>
                       {adminStore.users.map(u => (
                         <tr key={u.id}>
-                          <td>{u.id}</td>
-                          <td>{u.email}</td>
-                          <td>{u.firstName} {u.lastName}</td>
-                          <td><span className={`role-badge role-badge--${u.role}`}>{u.role}</span></td>
-                          <td>{u.telegram || '-'}</td>
-                          <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString('ru-RU') : '-'}</td>
-                          <td>
+                          <td data-label="ID">{u.id}</td>
+                          <td data-label="Email">{u.email}</td>
+                          <td data-label="Имя">{u.firstName} {u.lastName}</td>
+                          <td data-label="Роль"><span className={`role-badge role-badge--${u.role}`}>{u.role}</span></td>
+                          <td data-label="Telegram">{u.telegram || '-'}</td>
+                          <td data-label="Дата регистрации">{u.createdAt ? new Date(u.createdAt).toLocaleDateString('ru-RU') : '-'}</td>
+                          <td data-label="Действия">
                             <button 
                               className="btn btn-sm btn-outline"
                               onClick={() => handleEditUser(u)}
@@ -421,10 +421,10 @@ const AdminPanel: React.FC = observer(() => {
                     <tbody>
                       {adminStore.projects.map(p => (
                         <tr key={p.id}>
-                          <td>{p.id}</td>
-                          <td>{p.clientName}</td>
-                          <td>{PROJECT_TYPE_LABELS[p.type]}</td>
-                          <td>
+                          <td data-label="ID">{p.id}</td>
+                          <td data-label="Клиент">{p.clientName}</td>
+                          <td data-label="Тип">{PROJECT_TYPE_LABELS[p.type]}</td>
+                          <td data-label="Статус">
                             <select
                               value={p.status}
                               onChange={(e) => handleStatusChange(p.id, e.target.value as ProjectStatus)}
@@ -435,9 +435,9 @@ const AdminPanel: React.FC = observer(() => {
                               ))}
                             </select>
                           </td>
-                          <td>{p.telegram}</td>
-                          <td>{new Date(p.createdAt).toLocaleDateString('ru-RU')}</td>
-                          <td>
+                          <td data-label="Telegram">{p.telegram}</td>
+                          <td data-label="Дата">{new Date(p.createdAt).toLocaleDateString('ru-RU')}</td>
+                          <td data-label="Действия">
                             <button 
                               className="btn btn-sm btn-outline"
                               onClick={() => setSelectedProject(p)}
@@ -472,12 +472,12 @@ const AdminPanel: React.FC = observer(() => {
                     <tbody>
                       {adminStore.reviews.map(r => (
                         <tr key={r.id}>
-                          <td>{r.id}</td>
-                          <td>{r.username || `${r.user?.firstName || ''} ${r.user?.lastName || ''}`.trim()}</td>
-                          <td><StarRating rating={r.rating} size="sm" /></td>
-                          <td className="review-body-cell">{r.body.substring(0, 100)}...</td>
-                          <td>{new Date(r.createdAt).toLocaleDateString('ru-RU')}</td>
-                          <td>
+                          <td data-label="ID">{r.id}</td>
+                          <td data-label="Автор">{r.username || `${r.user?.firstName || ''} ${r.user?.lastName || ''}`.trim()}</td>
+                          <td data-label="Рейтинг"><StarRating rating={r.rating} size="sm" /></td>
+                          <td data-label="Текст" className="review-body-cell">{r.body.substring(0, 100)}...</td>
+                          <td data-label="Дата">{new Date(r.createdAt).toLocaleDateString('ru-RU')}</td>
+                          <td data-label="Действия">
                             <button 
                               className="btn btn-sm btn-danger"
                               onClick={() => handleDeleteReview(r.id)}
@@ -574,9 +574,9 @@ const AdminPanel: React.FC = observer(() => {
                         ) : (
                           contactStore.requests.map(request => (
                             <tr key={request.id} className={request.status === 'pending' ? 'row-highlight' : ''}>
-                              <td>{request.id}</td>
-                              <td>{request.name}</td>
-                              <td>
+                              <td data-label="ID">{request.id}</td>
+                              <td data-label="Имя">{request.name}</td>
+                              <td data-label="Telegram">
                                 <a 
                                   href={`https://t.me/${request.telegram.replace('@', '')}`}
                                   target="_blank"
@@ -587,12 +587,12 @@ const AdminPanel: React.FC = observer(() => {
                                   {request.telegram}
                                 </a>
                               </td>
-                              <td className="message-cell" title={request.message}>
+                              <td data-label="Сообщение" className="message-cell" title={request.message}>
                                 {request.message.length > 50 
                                   ? request.message.substring(0, 50) + '...' 
                                   : request.message}
                               </td>
-                              <td>
+                              <td data-label="Статус">
                                 <select
                                   value={request.status}
                                   onChange={(e) => handleRequestStatusChange(request.id, e.target.value as ContactRequestStatus)}
@@ -603,7 +603,7 @@ const AdminPanel: React.FC = observer(() => {
                                   ))}
                                 </select>
                               </td>
-                              <td>
+                              <td data-label="Пользователь">
                                 {request.user ? (
                                   <span className="user-badge">
                                     <PersonIcon fontSize="small" />
@@ -613,8 +613,8 @@ const AdminPanel: React.FC = observer(() => {
                                   <span className="guest-badge">Гость</span>
                                 )}
                               </td>
-                              <td>{formatDate(request.createdAt)}</td>
-                              <td>
+                              <td data-label="Дата">{formatDate(request.createdAt)}</td>
+                              <td data-label="Действия">
                                 <button 
                                   className="btn btn-sm btn-primary"
                                   onClick={() => handleOpenRequest(request)}

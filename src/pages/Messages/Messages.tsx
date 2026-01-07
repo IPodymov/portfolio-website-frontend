@@ -7,6 +7,7 @@ import type { User } from '../../types';
 import ForumIcon from '@mui/icons-material/Forum';
 import SendIcon from '@mui/icons-material/Send';
 import PersonIcon from '@mui/icons-material/Person';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import './Messages.css';
 
 const Messages: React.FC = observer(() => {
@@ -33,6 +34,11 @@ const Messages: React.FC = observer(() => {
   const handleSelectUser = (user: User) => {
     setSelectedUser(user);
     messagesStore.setCurrentChatUser(user);
+  };
+
+  const handleBack = () => {
+    setSelectedUser(null);
+    messagesStore.setCurrentChatUser(null);
   };
 
   const handleSend = async () => {
@@ -78,18 +84,25 @@ const Messages: React.FC = observer(() => {
 
   // Combine admins with existing conversations for user list
   const userList = () => {
+    const currentUserId = authStore.user?.id;
     const adminIds = messagesStore.admins.map(a => a.id);
     const convUserIds = messagesStore.conversations.map(c => c.user.id);
     
-    const adminsWithoutConv = messagesStore.admins.filter(a => !convUserIds.includes(a.id));
+    // Filter out self from admins
+    const adminsWithoutConv = messagesStore.admins.filter(
+      a => !convUserIds.includes(a.id) && a.id !== currentUserId
+    );
     
     return [
-      ...messagesStore.conversations.map(c => ({
-        user: c.user,
-        lastMessage: c.lastMessage?.content || 'Начните диалог',
-        unread: c.unreadCount,
-        isAdmin: adminIds.includes(c.user.id),
-      })),
+      // Filter out self from conversations
+      ...messagesStore.conversations
+        .filter(c => c.user.id !== currentUserId)
+        .map(c => ({
+          user: c.user,
+          lastMessage: c.lastMessage?.content || 'Начните диалог',
+          unread: c.unreadCount,
+          isAdmin: adminIds.includes(c.user.id),
+        })),
       ...adminsWithoutConv.map(a => ({
         user: a,
         lastMessage: 'Начните диалог',
@@ -107,7 +120,7 @@ const Messages: React.FC = observer(() => {
     <div className="messages-page">
       <div className="messages-container">
         {/* Sidebar with contacts */}
-        <div className="messages-sidebar">
+        <div className={`messages-sidebar ${selectedUser ? 'messages-sidebar--hidden' : ''}`}>
           <div className="messages-sidebar__header">
             <ForumIcon />
             <h2>Сообщения</h2>
@@ -158,6 +171,9 @@ const Messages: React.FC = observer(() => {
             <>
               {/* Chat Header */}
               <div className="messages-chat__header">
+                <button className="messages-chat__back" onClick={handleBack}>
+                  <ArrowBackIcon />
+                </button>
                 <div className="messages-chat__user-avatar">
                   {getInitials(selectedUser)}
                 </div>

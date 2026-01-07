@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { authStore } from '../../stores';
+import { authStore, messagesStore } from '../../stores';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
@@ -132,7 +132,7 @@ const Navbar: React.FC = observer(() => {
     <header className="navbar">
       <div className="navbar__container">
         {/* Logo */}
-        <Link to="/" className="navbar__logo">
+        <Link to="/" className={`navbar__logo ${isMenuOpen ? 'navbar__logo--hidden' : ''}`}>
           Portfolio
         </Link>
 
@@ -158,17 +158,28 @@ const Navbar: React.FC = observer(() => {
 
         {/* Mobile Toggle */}
         <button 
-          className="navbar__toggle" 
+          className={`navbar__toggle ${isMenuOpen ? 'is-hidden' : ''}`}
           onClick={toggleMenu}
-          aria-label="Toggle menu"
-          aria-expanded={isMenuOpen}
+          aria-label="Open menu"
         >
-          {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
+          <MenuIcon />
         </button>
 
         {/* Mobile Fullscreen Menu */}
         <div className={`navbar__mobile-menu ${isMenuOpen ? 'is-open' : ''}`}>
+          <div className="navbar__mobile-overlay" onClick={toggleMenu} />
           <div className="navbar__mobile-content">
+            <div className="navbar__mobile-header">
+              <span className="navbar__mobile-title">Меню</span>
+              <button 
+                className="navbar__close-btn" 
+                onClick={toggleMenu}
+                aria-label="Close menu"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
             <nav className="navbar__mobile-nav">
               {MENU_ITEMS.map((item) => (
                 <NavLink
@@ -181,6 +192,29 @@ const Navbar: React.FC = observer(() => {
                   {item.text}
                 </NavLink>
               ))}
+              {authStore.isAuthenticated && (
+                <NavLink
+                  to="/messages"
+                  className={({ isActive }) => 
+                    `navbar__mobile-link ${isActive ? 'navbar__mobile-link--active' : ''}`
+                  }
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  Сообщения
+                  {messagesStore.unreadCount > 0 && (
+                    <span style={{ 
+                      background: '#ef4444', 
+                      color: 'white', 
+                      padding: '2px 8px', 
+                      borderRadius: '10px', 
+                      fontSize: '0.8rem',
+                      lineHeight: '1'
+                    }}>
+                      {messagesStore.unreadCount}
+                    </span>
+                  )}
+                </NavLink>
+              )}
             </nav>
             <div className="navbar__mobile-footer">
               {renderAuthButtons(true)}

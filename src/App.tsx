@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { authStore } from './stores';
 import Layout from './components/Layout/Layout';
 import Home from './pages/Home/Home';
@@ -16,6 +16,17 @@ import Messages from './pages/Messages/Messages';
 import About from './pages/About/About';
 import './App.css';
 
+// Scroll to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   useEffect(() => {
     authStore.checkAuth();
@@ -23,6 +34,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
