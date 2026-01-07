@@ -9,6 +9,7 @@ import './Navbar.css';
 
 const MENU_ITEMS = [
   { text: 'Главная', path: '/' },
+  { text: 'Обо мне', path: '/about' },
   { text: 'Обсудить проект', path: '/contacts' },
   { text: 'Авторская разработка', path: '/order' },
   { text: 'Отзывы', path: '/reviews' },

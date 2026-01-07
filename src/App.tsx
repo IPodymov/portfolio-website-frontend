@@ -13,6 +13,7 @@ import Profile from './pages/Profile/Profile';
 import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
 import AdminPanel from './pages/Admin/AdminPanel';
 import Messages from './pages/Messages/Messages';
+import About from './pages/About/About';
 import './App.css';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="reviews" element={<Reviews />} />
           <Route path="reviews/:id" element={<ReviewDetail />} />
           <Route path="privacy" element={<PrivacyPolicy />} />
+          <Route path="about" element={<About />} />
           <Route path="admin" element={<AdminPanel />} />
           <Route path="messages" element={<Messages />} />
         </Route>
