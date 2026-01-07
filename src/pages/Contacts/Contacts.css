@@ -157,6 +157,18 @@
   resize: vertical;
 }
 
+/* Prefilled inputs (for authenticated users) */
+.contacts-form input.input--prefilled {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #166534;
+  cursor: not-allowed;
+}
+
+.contacts-form input.input--prefilled:hover {
+  border-color: #86efac;
+}
+
 /* Messages */
 .success-message {
   padding: var(--space-md);

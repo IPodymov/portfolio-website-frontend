@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import EmailIcon from '@mui/icons-material/Email';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import { contactStore } from '../../stores';
+import { contactStore, authStore } from '../../stores';
 import './Contacts.css';
 
 const Contacts: React.FC = observer(() => {
@@ -14,6 +14,16 @@ const Contacts: React.FC = observer(() => {
   });
 
   useEffect(() => {
+    // Если пользователь авторизован, подтягиваем его данные
+    if (authStore.isAuthenticated && authStore.user) {
+      const fullName = `${authStore.user.firstName || ''} ${authStore.user.lastName || ''}`.trim();
+      setFormData(prev => ({
+        ...prev,
+        name: fullName || prev.name,
+        telegram: authStore.user?.telegram || prev.telegram,
+      }));
+    }
+    
     return () => {
       contactStore.reset();
     };
@@ -100,6 +110,8 @@ const Contacts: React.FC = observer(() => {
                 onChange={handleChange}
                 required
                 placeholder="Иван Иванов"
+                disabled={authStore.isAuthenticated && !!authStore.user?.firstName}
+                className={authStore.isAuthenticated && authStore.user?.firstName ? 'input--prefilled' : ''}
               />
             </div>
 
@@ -113,6 +125,8 @@ const Contacts: React.FC = observer(() => {
                 onChange={handleChange}
                 required
                 placeholder="@username"
+                disabled={authStore.isAuthenticated && !!authStore.user?.telegram}
+                className={authStore.isAuthenticated && authStore.user?.telegram ? 'input--prefilled' : ''}
               />
             </div>
 

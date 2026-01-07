@@ -432,3 +432,144 @@
     white-space: nowrap;
   }
 }
+
+/* ========================================
+   PROJECT DETAILS (Modal Content)
+   ======================================== */
+.project-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.project-details__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+.project-details__label {
+  min-width: 140px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.project-details__value {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.project-details__link {
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  word-break: break-all;
+  transition: color var(--transition-fast);
+}
+
+.project-details__link:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+.project-details__description {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-bg-tertiary);
+  margin-top: var(--space-sm);
+}
+
+.project-details__text {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ========================================
+   EDIT USER FORM
+   ======================================== */
+
+.edit-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.form-input,
+.form-select {
+  padding: var(--space-md);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.form-error {
+  padding: var(--space-md);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+}
+
+/* Project Details Responsive */
+@media (max-width: 768px) {
+  .project-details__row {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  
+  .project-details__label {
+    min-width: unset;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

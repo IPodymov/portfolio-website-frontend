@@ -135,6 +135,58 @@ class AuthStore {
     }
   }
 
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      await api.put('/auth/password', { currentPassword, newPassword });
+      return { success: true };
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      const message = error.response?.data?.message || 'Не удалось изменить пароль';
+      return { success: false, error: message };
+    }
+  }
+
+  async uploadAvatar(file: File): Promise<{ success: boolean; error?: string }> {
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      
+      const response = await api.post<ProfileResponse>('/auth/profile/avatar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      runInAction(() => {
+        this.user = response.data.user;
+        this.permissions = response.data.permissions || [];
+      });
+      
+      return { success: true };
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      const message = error.response?.data?.message || 'Не удалось загрузить аватарку';
+      return { success: false, error: message };
+    }
+  }
+
+  async deleteAvatar(): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await api.delete<ProfileResponse>('/auth/profile/avatar');
+      
+      runInAction(() => {
+        this.user = response.data.user;
+        this.permissions = response.data.permissions || [];
+      });
+      
+      return { success: true };
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      const message = error.response?.data?.message || 'Не удалось удалить аватарку';
+      return { success: false, error: message };
+    }
+  }
+
   hasPermission(permission: string): boolean {
     return this.permissions.includes(permission);
   }

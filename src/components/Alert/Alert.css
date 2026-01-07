@@ -1,0 +1,75 @@
+/* ========================================
+   ALERT COMPONENT
+   ======================================== */
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+/* Variants */
+.alert--success {
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+.alert--error {
+  background: var(--color-error-light);
+  color: var(--color-error-dark);
+}
+
+.alert--warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning-dark);
+}
+
+.alert--info {
+  background: var(--color-info-light);
+  color: var(--color-info-dark);
+}
+
+/* Icon */
+.alert__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.alert__icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Content */
+.alert__content {
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* Close Button */
+.alert__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: currentColor;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.alert__close:hover {
+  opacity: 1;
+}

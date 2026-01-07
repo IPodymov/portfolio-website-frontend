@@ -75,7 +75,15 @@ const Navbar: React.FC = observer(() => {
                     onClick={handleDropdownToggle}
                     aria-label="Меню профиля"
                   >
-                    <PersonIcon />
+                    {authStore.user?.avatarUrl ? (
+                      <img 
+                        src={authStore.user.avatarUrl} 
+                        alt="Avatar" 
+                        className="navbar__avatar"
+                      />
+                    ) : (
+                      <PersonIcon />
+                    )}
                   </button>
                   
                   {dropdownOpen && (

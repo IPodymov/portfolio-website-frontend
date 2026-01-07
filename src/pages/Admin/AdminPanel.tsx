@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import type { ProjectStatus } from '../../types';
+import type { ProjectStatus, Project, User, UserRole } from '../../types';
 import { authStore, adminStore } from '../../stores';
 import { useNavigate } from 'react-router-dom';
 import { StatusBadge } from '../../components/StatusBadge';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { StarRating } from '../../components/StarRating';
 import { PROJECT_TYPE_LABELS, PROJECT_STATUS_OPTIONS } from '../../constants';
+import Modal from '../../components/Modal';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import FolderIcon from '@mui/icons-material/Folder';
@@ -16,13 +17,40 @@ import PendingIcon from '@mui/icons-material/Pending';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BuildIcon from '@mui/icons-material/Build';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import './AdminPanel.css';
 
+const USER_ROLE_OPTIONS: { value: UserRole; label: string }[] = [
+  { value: 'user', label: 'Пользователь' },
+  { value: 'moderator', label: 'Модератор' },
+  { value: 'admin', label: 'Администратор' },
+];
+
 type TabType = 'dashboard' | 'users' | 'projects' | 'reviews';
+
+interface EditUserForm {
+  email: string;
+  firstName: string;
+  lastName: string;
+  telegram: string;
+  role: UserRole;
+  password: string;
+}
 
 const AdminPanel: React.FC = observer(() => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [editUserForm, setEditUserForm] = useState<EditUserForm>({
+    email: '',
+    firstName: '',
+    lastName: '',
+    telegram: '',
+    role: 'user',
+    password: '',
+  });
+  const [isSavingUser, setIsSavingUser] = useState(false);
 
   useEffect(() => {
     if (!authStore.isLoading && authStore.user?.role !== 'admin') {
@@ -43,6 +71,67 @@ const AdminPanel: React.FC = observer(() => {
   const handleDeleteReview = async (reviewId: number) => {
     if (!confirm('Вы уверены, что хотите удалить этот отзыв?')) return;
     await adminStore.deleteReview(reviewId);
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setEditUserForm({
+      email: user.email || '',
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      telegram: user.telegram || '',
+      role: user.role,
+      password: '',
+    });
+  };
+
+  const handleCloseUserModal = () => {
+    setSelectedUser(null);
+    setEditUserForm({
+      email: '',
+      firstName: '',
+      lastName: '',
+      telegram: '',
+      role: 'user',
+      password: '',
+    });
+  };
+
+  const handleSaveUser = async () => {
+    if (!selectedUser) return;
+    
+    setIsSavingUser(true);
+    
+    // Собираем только измененные поля
+    const updateData: Record<string, string> = {};
+    
+    if (editUserForm.email !== selectedUser.email) {
+      updateData.email = editUserForm.email;
+    }
+    if (editUserForm.firstName !== (selectedUser.firstName || '')) {
+      updateData.firstName = editUserForm.firstName;
+    }
+    if (editUserForm.lastName !== (selectedUser.lastName || '')) {
+      updateData.lastName = editUserForm.lastName;
+    }
+    if (editUserForm.telegram !== (selectedUser.telegram || '')) {
+      updateData.telegram = editUserForm.telegram;
+    }
+    if (editUserForm.role !== selectedUser.role) {
+      updateData.role = editUserForm.role;
+    }
+    // Пароль отправляем только если он заполнен (бэкенд захэширует)
+    if (editUserForm.password.trim()) {
+      updateData.password = editUserForm.password;
+    }
+
+    const success = await adminStore.updateUser(selectedUser.id, updateData);
+    
+    setIsSavingUser(false);
+    
+    if (success) {
+      handleCloseUserModal();
+    }
   };
 
   if (authStore.isLoading || authStore.user?.role !== 'admin') return null;
@@ -212,6 +301,7 @@ const AdminPanel: React.FC = observer(() => {
                         <th>Роль</th>
                         <th>Telegram</th>
                         <th>Дата регистрации</th>
+                        <th>Действия</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -223,6 +313,15 @@ const AdminPanel: React.FC = observer(() => {
                           <td><span className={`role-badge role-badge--${u.role}`}>{u.role}</span></td>
                           <td>{u.telegram || '-'}</td>
                           <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString('ru-RU') : '-'}</td>
+                          <td>
+                            <button 
+                              className="btn btn-sm btn-outline"
+                              onClick={() => handleEditUser(u)}
+                            >
+                              <EditIcon fontSize="small" />
+                              Редактировать
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -268,7 +367,12 @@ const AdminPanel: React.FC = observer(() => {
                           <td>{p.telegram}</td>
                           <td>{new Date(p.createdAt).toLocaleDateString('ru-RU')}</td>
                           <td>
-                            <button className="btn btn-sm btn-outline">Детали</button>
+                            <button 
+                              className="btn btn-sm btn-outline"
+                              onClick={() => setSelectedProject(p)}
+                            >
+                              Детали
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -320,6 +424,194 @@ const AdminPanel: React.FC = observer(() => {
           </>
         )}
       </div>
+
+      {/* Project Details Modal */}
+      <Modal
+        isOpen={!!selectedProject}
+        onClose={() => setSelectedProject(null)}
+        title={selectedProject ? `Детали проекта #${selectedProject.id}` : ''}
+        footer={
+          <button 
+            className="btn btn-secondary"
+            onClick={() => setSelectedProject(null)}
+          >
+            Закрыть
+          </button>
+        }
+      >
+        {selectedProject && (
+          <div className="project-details">
+            <div className="project-details__row">
+              <span className="project-details__label">Клиент:</span>
+              <span className="project-details__value">{selectedProject.clientName}</span>
+            </div>
+            <div className="project-details__row">
+              <span className="project-details__label">Telegram:</span>
+              <a 
+                href={`https://t.me/${selectedProject.telegram.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="project-details__link"
+              >
+                {selectedProject.telegram}
+              </a>
+            </div>
+            <div className="project-details__row">
+              <span className="project-details__label">Тип проекта:</span>
+              <span className="project-details__value">{PROJECT_TYPE_LABELS[selectedProject.type]}</span>
+            </div>
+            <div className="project-details__row">
+              <span className="project-details__label">Статус:</span>
+              <StatusBadge status={selectedProject.status} />
+            </div>
+            <div className="project-details__row">
+              <span className="project-details__label">Дата создания:</span>
+              <span className="project-details__value">
+                {new Date(selectedProject.createdAt).toLocaleString('ru-RU')}
+              </span>
+            </div>
+            {selectedProject.updatedAt && (
+              <div className="project-details__row">
+                <span className="project-details__label">Обновлён:</span>
+                <span className="project-details__value">
+                  {new Date(selectedProject.updatedAt).toLocaleString('ru-RU')}
+                </span>
+              </div>
+            )}
+            {selectedProject.githubRepoLink && (
+              <div className="project-details__row">
+                <span className="project-details__label">GitHub:</span>
+                <a 
+                  href={selectedProject.githubRepoLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-details__link"
+                >
+                  {selectedProject.githubRepoLink}
+                </a>
+              </div>
+            )}
+            {selectedProject.specLink && (
+              <div className="project-details__row">
+                <span className="project-details__label">Спецификация:</span>
+                <a 
+                  href={selectedProject.specLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-details__link"
+                >
+                  {selectedProject.specLink}
+                </a>
+              </div>
+            )}
+            <div className="project-details__description">
+              <span className="project-details__label">Описание:</span>
+              <p className="project-details__text">{selectedProject.description || 'Описание отсутствует'}</p>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Edit User Modal */}
+      <Modal
+        isOpen={!!selectedUser}
+        onClose={handleCloseUserModal}
+        title={selectedUser ? `Редактирование пользователя #${selectedUser.id}` : ''}
+        footer={
+          <>
+            <button 
+              className="btn btn-secondary"
+              onClick={handleCloseUserModal}
+              disabled={isSavingUser}
+            >
+              Отмена
+            </button>
+            <button 
+              className="btn btn-primary"
+              onClick={handleSaveUser}
+              disabled={isSavingUser}
+            >
+              {isSavingUser ? 'Сохранение...' : 'Сохранить'}
+            </button>
+          </>
+        }
+      >
+        {selectedUser && (
+          <div className="edit-user-form">
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                className="form-input"
+                value={editUserForm.email}
+                onChange={(e) => setEditUserForm({ ...editUserForm, email: e.target.value })}
+              />
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Имя</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={editUserForm.firstName}
+                  onChange={(e) => setEditUserForm({ ...editUserForm, firstName: e.target.value })}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Фамилия</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={editUserForm.lastName}
+                  onChange={(e) => setEditUserForm({ ...editUserForm, lastName: e.target.value })}
+                />
+              </div>
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Telegram</label>
+              <input
+                type="text"
+                className="form-input"
+                value={editUserForm.telegram}
+                onChange={(e) => setEditUserForm({ ...editUserForm, telegram: e.target.value })}
+                placeholder="@username"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Роль</label>
+              <select
+                className="form-select"
+                value={editUserForm.role}
+                onChange={(e) => setEditUserForm({ ...editUserForm, role: e.target.value as UserRole })}
+              >
+                {USER_ROLE_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Новый пароль</label>
+              <input
+                type="password"
+                className="form-input"
+                value={editUserForm.password}
+                onChange={(e) => setEditUserForm({ ...editUserForm, password: e.target.value })}
+                placeholder="Оставьте пустым, чтобы не менять"
+              />
+              <span className="form-hint">Пароль будет захэширован на сервере</span>
+            </div>
+
+            {adminStore.error && (
+              <div className="form-error">{adminStore.error}</div>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 });

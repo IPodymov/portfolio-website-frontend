@@ -1,0 +1,83 @@
+/* ========================================
+   CARD COMPONENT
+   ======================================== */
+
+.card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+/* Variants */
+.card--default {
+  background: var(--color-bg-card);
+}
+
+.card--bordered {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-bg-tertiary);
+  box-shadow: none;
+}
+
+.card--glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Padding */
+.card--padding-none {
+  padding: 0;
+}
+
+.card--padding-sm {
+  padding: var(--space-md);
+}
+
+.card--padding-md {
+  padding: var(--space-lg);
+}
+
+.card--padding-lg {
+  padding: var(--space-xl);
+}
+
+.card--padding-xl {
+  padding: var(--space-2xl);
+}
+
+/* Hover Effect */
+.card--hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Clickable */
+.card--clickable {
+  cursor: pointer;
+}
+
+/* Card Parts */
+.card__header {
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-bg-tertiary);
+  margin-bottom: var(--space-lg);
+}
+
+.card__body {
+  flex: 1;
+}
+
+.card__footer {
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-bg-tertiary);
+  margin-top: var(--space-lg);
+}
+
+.card__title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}

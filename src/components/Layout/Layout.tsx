@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import Navbar from '../Navbar/Navbar';
 import CookieConsent from '../CookieConsent/CookieConsent';
+import ChatWidget from '../ChatWidget/ChatWidget';
 import './Layout.css';
 
 const Layout: React.FC = () => {
@@ -18,6 +19,7 @@ const Layout: React.FC = () => {
         </div>
       </footer>
       <CookieConsent />
+      <ChatWidget />
     </div>
   );
 };

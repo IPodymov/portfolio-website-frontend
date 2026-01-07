@@ -67,6 +67,15 @@ export interface AdminStats {
   inProgressProjects: number;
 }
 
+export interface UpdateUserRequest {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  telegram?: string;
+  role?: UserRole;
+  password?: string; // Will be hashed on backend
+}
+
 // Interfaces
 export interface User {
   id: number;
@@ -74,6 +83,7 @@ export interface User {
   firstName?: string;
   lastName?: string;
   telegram?: string;
+  avatarUrl?: string;
   role: UserRole;
   name?: string; // вычисляемое поле с бэкенда
   createdAt?: string;
@@ -123,8 +133,23 @@ export interface Notification {
 export interface ChatMessage {
   id: number;
   content: string;
-  sender: User;
+  senderId: number;
+  receiverId: number;
+  sender?: User;
+  receiver?: User;
+  isRead: boolean;
   createdAt: string;
+}
+
+export interface Conversation {
+  user: User;
+  lastMessage: ChatMessage;
+  unreadCount: number;
+}
+
+export interface SendMessageRequest {
+  receiverId: number;
+  content: string;
 }
 
 // Auth

@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import type { User, Project, Review, AdminStats, ProjectStatus } from '../types';
+import type { User, Project, Review, AdminStats, ProjectStatus, UpdateUserRequest } from '../types';
 import api from './api';
 
 class AdminStore {
@@ -126,6 +126,26 @@ class AdminStore {
       console.error('Failed to update status', err);
       runInAction(() => {
         this.error = 'Не удалось обновить статус';
+      });
+      return false;
+    }
+  }
+
+  async updateUser(userId: number, data: UpdateUserRequest): Promise<boolean> {
+    this.error = null;
+    
+    try {
+      const response = await api.patch<User>(`/admin/users/${userId}`, data);
+      runInAction(() => {
+        this.users = this.users.map(u => 
+          u.id === userId ? { ...u, ...response.data } : u
+        );
+      });
+      return true;
+    } catch (err) {
+      console.error('Failed to update user', err);
+      runInAction(() => {
+        this.error = 'Не удалось обновить пользователя';
       });
       return false;
     }

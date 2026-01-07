@@ -5,3 +5,4 @@ export { adminStore } from './AdminStore';
 export { githubStore } from './GitHubStore';
 export { contactStore } from './ContactStore';
 export { cookieConsentStore } from './CookieConsentStore';
+export { messagesStore } from './MessagesStore';

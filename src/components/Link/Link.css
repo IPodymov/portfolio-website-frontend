@@ -1,0 +1,47 @@
+/* ========================================
+   LINK COMPONENT
+   ======================================== */
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Variants */
+.link--default {
+  color: var(--color-text);
+}
+
+.link--default:hover {
+  color: var(--color-accent);
+}
+
+.link--accent {
+  color: var(--color-accent);
+}
+
+.link--accent:hover {
+  color: var(--color-accent-dark);
+}
+
+.link--muted {
+  color: var(--color-text-secondary);
+}
+
+.link--muted:hover {
+  color: var(--color-text);
+}
+
+/* External Icon */
+.link__external-icon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
