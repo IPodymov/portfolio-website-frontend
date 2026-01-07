@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { authStore, projectsStore, contactStore } from '../../stores';
 import { PROJECT_TYPE_OPTIONS } from '../../constants';
@@ -47,6 +47,19 @@ const Order: React.FC = observer(() => {
     type: ProjectType.LANDING,
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  // Pre-fill form with user data if authenticated
+  useEffect(() => {
+    if (authStore.isAuthenticated && authStore.user) {
+      const user = authStore.user;
+      const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+      setFormData((prev) => ({
+        ...prev,
+        name: fullName || prev.name,
+        telegram: user.telegram || prev.telegram,
+      }));
+    }
+  }, [authStore.isAuthenticated, authStore.user]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
