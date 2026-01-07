@@ -18,11 +18,11 @@ const ChatWidget: React.FC = observer(() => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (authStore.isAuthenticated) {
+    if (authStore.isAuthenticated && !authStore.isLoading) {
       messagesStore.loadConversations();
       messagesStore.loadAdmins();
     }
-  }, []);
+  }, [authStore.isAuthenticated, authStore.isLoading]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -31,10 +31,6 @@ const ChatWidget: React.FC = observer(() => {
   });
 
   const handleToggle = () => {
-    if (!authStore.isAuthenticated) {
-      navigate('/login');
-      return;
-    }
     setIsOpen(!isOpen);
   };
 
@@ -89,19 +85,24 @@ const ChatWidget: React.FC = observer(() => {
 
   // Combine admins with existing conversations for user list
   const userList = () => {
+    const currentUserId = authStore.user?.id;
     const adminIds = messagesStore.admins.map(a => a.id);
     const convUserIds = messagesStore.conversations.map(c => c.user.id);
     
-    // Add admins who don't have conversations yet
-    const adminsWithoutConv = messagesStore.admins.filter(a => !convUserIds.includes(a.id));
+    // Add admins who don't have conversations yet (exclude self)
+    const adminsWithoutConv = messagesStore.admins.filter(
+      a => !convUserIds.includes(a.id) && a.id !== currentUserId
+    );
     
     return [
-      ...messagesStore.conversations.map(c => ({
-        user: c.user,
-        lastMessage: c.lastMessage?.content || 'Начните диалог',
-        unread: c.unreadCount,
-        isAdmin: adminIds.includes(c.user.id),
-      })),
+      ...messagesStore.conversations
+        .filter(c => c.user.id !== currentUserId) // Exclude self from conversations
+        .map(c => ({
+          user: c.user,
+          lastMessage: c.lastMessage?.content || 'Начните диалог',
+          unread: c.unreadCount,
+          isAdmin: adminIds.includes(c.user.id),
+        })),
       ...adminsWithoutConv.map(a => ({
         user: a,
         lastMessage: 'Начните диалог',
@@ -112,11 +113,7 @@ const ChatWidget: React.FC = observer(() => {
   };
 
   if (!authStore.isAuthenticated) {
-    return (
-      <button className="chat-widget__fab" onClick={handleToggle} title="Войдите для сообщений">
-        <ForumIcon />
-      </button>
-    );
+    return null;
   }
 
   return (

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { authStore } from '../../stores';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -7,215 +7,187 @@ import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
 import './Navbar.css';
 
+const MENU_ITEMS = [
+  { text: 'Главная', path: '/' },
+  { text: 'Контакты', path: '/contacts' },
+  { text: 'Заказать ПО', path: '/order' },
+  { text: 'Отзывы', path: '/reviews' },
+];
+
 const Navbar: React.FC = observer(() => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  // Close menu on route change
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsProfileOpen(false);
+  }, [location.pathname]);
 
-  const handleDropdownToggle = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
 
   const handleLogout = () => {
     authStore.logout();
     navigate('/login');
-    setMobileOpen(false);
-    setDropdownOpen(false);
   };
 
-  const menuItems = [
-    { text: 'Главная', path: '/' },
-    { text: 'Контакты', path: '/contacts' },
-    { text: 'Заказать ПО', path: '/order' },
-    { text: 'Отзывы', path: '/reviews' },
-  ];
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
 
-  const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
+  const renderAuthButtons = (isMobile = false) => {
+    if (authStore.isLoading) {
+      return <div className="navbar__auth-loader"></div>;
     }
-    return location.pathname.startsWith(path);
+
+    if (authStore.isAuthenticated) {
+      const user = authStore.user;
+      
+      if (isMobile) {
+        return (
+          <div className="navbar__mobile-auth">
+            <div className="navbar__mobile-user">
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="Avatar" className="navbar__avatar-small" />
+              ) : (
+                <PersonIcon />
+              )}
+              <span>{user?.name || user?.email}</span>
+            </div>
+            <Link to="/profile" className="btn btn-outline btn-block">Профиль</Link>
+            {authStore.isModerator && (
+              <Link to="/admin" className="btn btn-outline btn-block">Админ панель</Link>
+            )}
+            <button onClick={handleLogout} className="btn btn-primary btn-block">
+              Выйти
+            </button>
+          </div>
+        );
+      }
+
+      return (
+        <div className="navbar__profile-dropdown">
+          <button className="navbar__avatar-btn" onClick={toggleProfile}>
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt="Avatar" className="navbar__avatar" />
+            ) : (
+              <PersonIcon />
+            )}
+          </button>
+          
+          {isProfileOpen && (
+            <>
+              <div className="navbar__dropdown-overlay" onClick={() => setIsProfileOpen(false)} />
+              <div className="navbar__dropdown-menu">
+                <div className="navbar__user-info">
+                  <strong>{user?.name}</strong>
+                  <small>{user?.email}</small>
+                </div>
+                <hr />
+                <Link to="/profile" className="navbar__dropdown-item">Профиль</Link>
+                {authStore.isModerator && (
+                  <Link to="/admin" className="navbar__dropdown-item">Админ панель</Link>
+                )}
+                <button onClick={handleLogout} className="navbar__dropdown-item text-danger">
+                  Выйти
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // Guest state
+    if (isMobile) {
+      return (
+        <div className="navbar__mobile-auth-actions">
+          <Link to="/login" className="btn btn-outline btn-block">Вход</Link>
+          <Link to="/register" className="btn btn-primary btn-block">Регистрация</Link>
+        </div>
+      );
+    }
+
+    return (
+      <div className="navbar__auth-actions">
+        <Link to="/login" className="navbar__link">Вход</Link>
+        <Link to="/register" className="btn btn-primary btn-sm">Регистрация</Link>
+      </div>
+    );
   };
 
   return (
-    <nav className="navbar">
+    <header className="navbar">
       <div className="navbar__container">
-        <div className="navbar__brand">
-          <Link to="/" className="navbar__link">
-            Portfolio
-          </Link>
-        </div>
+        {/* Logo */}
+        <Link to="/" className="navbar__logo">
+          Portfolio
+        </Link>
 
-        {/* Desktop Menu */}
-        <div className="navbar__menu-desktop">
-          <div className="navbar__list">
-            {menuItems.map((item) => (
+        {/* Desktop Nav */}
+        <nav className="navbar__nav-desktop">
+          <div className="navbar__links">
+            {MENU_ITEMS.map((item) => (
               <NavLink
-                key={item.text}
+                key={item.path}
                 to={item.path}
-                className={({ isActive }) =>
-                  isActive ? 'navbar__link navbar__link--active' : 'navbar__link'
-                }>
+                className={({ isActive }) => 
+                  `navbar__link ${isActive ? 'navbar__link--active' : ''}`
+                }
+              >
                 {item.text}
               </NavLink>
             ))}
           </div>
-
-          <div className="navbar__auth">
-            {authStore.isAuthenticated ? (
-              <div className="navbar__user-actions">
-                <div className="navbar__dropdown-container">
-                  <button 
-                    className="navbar__profile-btn" 
-                    onClick={handleDropdownToggle}
-                    aria-label="Меню профиля"
-                  >
-                    {authStore.user?.avatarUrl ? (
-                      <img 
-                        src={authStore.user.avatarUrl} 
-                        alt="Avatar" 
-                        className="navbar__avatar"
-                      />
-                    ) : (
-                      <PersonIcon />
-                    )}
-                  </button>
-                  
-                  {dropdownOpen && (
-                    <div className="navbar__dropdown-menu">
-                      <Link 
-                        to="/profile" 
-                        className="navbar__dropdown-item"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        Профиль
-                      </Link>
-                      
-                      {authStore.isModerator && (
-                        <Link 
-                          to="/admin" 
-                          className="navbar__dropdown-item"
-                          onClick={() => setDropdownOpen(false)}
-                        >
-                          Админ панель
-                        </Link>
-                      )}
-                      
-                      <button 
-                        onClick={handleLogout} 
-                        className="navbar__dropdown-item navbar__dropdown-item--logout"
-                      >
-                        Выйти
-                      </button>
-                    </div>
-                  )}
-                  
-                  {/* Overlay to close dropdown when clicking outside */}
-                  {dropdownOpen && (
-                    <div 
-                      className="navbar__dropdown-overlay" 
-                      onClick={() => setDropdownOpen(false)}
-                    />
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="navbar__auth-links">
-                <Link to="/login" className="navbar__link">
-                  Вход
-                </Link>
-                <Link to="/register" className="btn btn-primary">
-                  Регистрация
-                </Link>
-              </div>
-            )}
+          <div className="navbar__auth-desktop">
+            {renderAuthButtons(false)}
           </div>
-        </div>
+        </nav>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="navbar__toggle-btn"
-          onClick={handleDrawerToggle}
-          aria-label="Открыть меню">
-          <MenuIcon />
+        {/* Mobile Toggle */}
+        <button 
+          className="navbar__toggle" 
+          onClick={toggleMenu}
+          aria-label="Toggle menu"
+          aria-expanded={isMenuOpen}
+        >
+          {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
         </button>
 
-        {/* Mobile Drawer */}
-        <div className={`drawer ${mobileOpen ? 'drawer--open' : ''}`}>
-          <div className="drawer__overlay" onClick={handleDrawerToggle}></div>
-          <div className="drawer__content">
-            <div className="drawer__header">
-              <button className="drawer__close-btn" onClick={handleDrawerToggle}>
-                <CloseIcon />
-              </button>
-            </div>
-            <ul className="drawer__list">
-              {menuItems.map((item) => (
-                <li key={item.text}>
-                  <Link
-                    to={item.path}
-                    onClick={handleDrawerToggle}
-                    className={`drawer__link ${isActive(item.path) ? 'drawer__link--active' : ''}`}>
-                    {item.text}
-                  </Link>
-                </li>
+        {/* Mobile Fullscreen Menu */}
+        <div className={`navbar__mobile-menu ${isMenuOpen ? 'is-open' : ''}`}>
+          <div className="navbar__mobile-content">
+            <nav className="navbar__mobile-nav">
+              {MENU_ITEMS.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) => 
+                    `navbar__mobile-link ${isActive ? 'navbar__mobile-link--active' : ''}`
+                  }
+                >
+                  {item.text}
+                </NavLink>
               ))}
-              {authStore.isAuthenticated && (
-                <li>
-                  <Link
-                    to="/profile"
-                    onClick={handleDrawerToggle}
-                    className={`drawer__link ${
-                      isActive('/profile') ? 'drawer__link--active' : ''
-                    }`}>
-                    Профиль
-                  </Link>
-                </li>
-              )}
-              {authStore.isAuthenticated && authStore.isModerator && (
-                <li>
-                  <Link
-                    to="/admin"
-                    onClick={handleDrawerToggle}
-                    className={`drawer__link ${
-                      isActive('/admin') ? 'drawer__link--active' : ''
-                    }`}>
-                    Админ панель
-                  </Link>
-                </li>
-              )}
-            </ul>
-            <div className="drawer__auth">
-              {authStore.isAuthenticated ? (
-                <button onClick={handleLogout} className="btn btn-primary btn-block">
-                  Выйти
-                </button>
-              ) : (
-                <div className="drawer__auth-group">
-                  <Link
-                    to="/login"
-                    className="btn btn-outline btn-block"
-                    onClick={handleDrawerToggle}>
-                    Вход
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="btn btn-primary btn-block"
-                    onClick={handleDrawerToggle}>
-                    Регистрация
-                  </Link>
-                </div>
-              )}
+            </nav>
+            <div className="navbar__mobile-footer">
+              {renderAuthButtons(true)}
             </div>
           </div>
         </div>
       </div>
-    </nav>
+    </header>
   );
 });
 

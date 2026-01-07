@@ -3,7 +3,7 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 1000;
+  z-index: var(--z-chat);
 }
 
 /* Floating Action Button */
@@ -348,15 +348,54 @@
 }
 
 /* Responsive */
+@media (max-width: 768px) {
+  .chat-widget {
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .chat-widget__popup {
+    width: min(380px, calc(100vw - 40px));
+    height: 50vh;
+    max-height: 450px;
+  }
+  
+  .chat-widget__btn {
+    width: 52px;
+    height: 52px;
+  }
+}
+
 @media (max-width: 480px) {
   .chat-widget {
     bottom: 16px;
     right: 16px;
   }
 
+  .chat-widget__btn {
+    width: 48px;
+    height: 48px;
+  }
+
   .chat-widget__popup {
+    position: fixed;
     width: calc(100vw - 32px);
-    height: 60vh;
-    bottom: 65px;
+    height: calc(100vh - 100px);
+    max-height: none;
+    bottom: 70px;
+    right: 16px;
+    border-radius: var(--radius-xl);
+  }
+  
+  .chat-widget__header {
+    padding: var(--space-md);
+  }
+  
+  .chat-widget__user-list {
+    max-height: 150px;
+  }
+  
+  .chat-widget__input-form {
+    padding: var(--space-sm);
   }
 }

@@ -152,13 +152,35 @@
 }
 
 /* Responsive */
+@media (max-width: 768px) {
+  .auth {
+    padding: var(--space-lg);
+    min-height: calc(100vh - 70px);
+  }
+  
+  .auth__card {
+    padding: var(--space-xl);
+  }
+  
+  .auth__title {
+    font-size: var(--font-size-xl);
+  }
+}
+
 @media (max-width: 480px) {
   .auth {
     padding: var(--space-md);
+    min-height: calc(100vh - 60px);
   }
 
   .auth__card {
     padding: var(--space-lg);
+    border-radius: var(--radius-xl);
+  }
+  
+  .auth__logo {
+    width: 56px;
+    height: 56px;
   }
 
   .auth__options {

@@ -55,8 +55,19 @@
     padding-top: 70px;
   }
 
+  .layout__footer {
+    padding: var(--space-lg) 0;
+  }
+
   .layout__footer-content {
     flex-direction: column;
     text-align: center;
+    padding: 0 var(--space-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .layout__main {
+    padding-top: 60px;
   }
 }

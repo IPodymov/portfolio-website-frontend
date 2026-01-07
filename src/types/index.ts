@@ -36,6 +36,14 @@ export const ServiceQuality = {
 
 export type ServiceQuality = typeof ServiceQuality[keyof typeof ServiceQuality];
 
+export const ContactRequestStatus = {
+  PENDING: 'pending',
+  CONTACTED: 'contacted',
+  CLOSED: 'closed'
+} as const;
+
+export type ContactRequestStatus = typeof ContactRequestStatus[keyof typeof ContactRequestStatus];
+
 // API Request types
 export interface CreateProjectRequest {
   name: string;
@@ -128,6 +136,28 @@ export interface Notification {
   message: string;
   isRead: boolean;
   createdAt: string;
+}
+
+export interface ContactRequest {
+  id: number;
+  name: string;
+  telegram: string;
+  message: string;
+  status: ContactRequestStatus;
+  user?: User;
+  userId?: number;
+  handledBy?: User;
+  handledById?: number;
+  handledAt?: string;
+  adminNotes?: string;
+  createdAt: string;
+}
+
+export interface ContactRequestStats {
+  total: number;
+  pending: number;
+  contacted: number;
+  closed: number;
 }
 
 export interface ChatMessage {

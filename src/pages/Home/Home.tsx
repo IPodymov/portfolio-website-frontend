@@ -118,6 +118,15 @@ const Home: React.FC = observer(() => {
             </div>
           ))}
         </div>
+        <div className="home__projects-more">
+          <a
+            href="https://github.com/IPodymov"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-outline">
+            Смотреть все проекты на GitHub
+          </a>
+        </div>
       </section>
 
       {/* Reviews Teaser */}

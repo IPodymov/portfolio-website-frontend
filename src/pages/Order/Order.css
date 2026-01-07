@@ -1,21 +1,26 @@
 .order-page {
   max-width: 600px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: var(--space-2xl) var(--space-lg);
 }
 
 .order-page__title {
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  font-weight: 600;
+  margin-bottom: var(--space-xl);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .order-page__card {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-xl);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-md);
 }
 
 .order-page__card .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-lg);
 }
 
 .order-success {
@@ -23,45 +28,61 @@
   justify-content: center;
   align-items: center;
   min-height: 50vh;
-  padding: 2rem;
+  padding: var(--space-2xl);
 }
 
 .order-success__card {
   text-align: center;
   max-width: 400px;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-lg);
 }
 
 .order-success__title {
-  color: #065f46;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+  color: var(--color-success-dark);
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
 }
 
 .order-success__text {
-  color: #6b7280;
-  margin-bottom: 1.5rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xl);
 }
 
 /* Responsive */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .order-page {
-    padding: 0.5rem;
+    padding: var(--space-xl) var(--space-md);
   }
 
   .order-page__title {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
+  }
+  
+  .order-page__card {
+    padding: var(--space-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .order-page {
+    padding: var(--space-lg) var(--space-md);
   }
 
   .order-success {
     min-height: 40vh;
-    padding: 1rem;
+    padding: var(--space-lg);
   }
 
   .order-success__card {
     max-width: 100%;
+    padding: var(--space-lg);
   }
 
   .order-success__title {
-    font-size: 1.25rem;
+    font-size: var(--font-size-lg);
   }
 }

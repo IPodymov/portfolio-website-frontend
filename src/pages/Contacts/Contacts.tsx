@@ -10,6 +10,7 @@ const Contacts: React.FC = observer(() => {
   const [formData, setFormData] = useState({
     name: '',
     telegram: '',
+    specLink: '',
     message: '',
   });
 
@@ -36,9 +37,19 @@ const Contacts: React.FC = observer(() => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await contactStore.sendMessage(formData);
+    
+    // Формируем сообщение с ТЗ если указано
+    const messageWithSpec = formData.specLink 
+      ? `${formData.message}\n\n📋 Ссылка на ТЗ: ${formData.specLink}`
+      : formData.message;
+    
+    const success = await contactStore.sendMessage({
+      name: formData.name,
+      telegram: formData.telegram,
+      message: messageWithSpec,
+    });
     if (success) {
-      setFormData({ name: '', telegram: '', message: '' });
+      setFormData({ name: '', telegram: '', specLink: '', message: '' });
       setTimeout(() => contactStore.reset(), 3000);
     }
   };
@@ -128,6 +139,19 @@ const Contacts: React.FC = observer(() => {
                 disabled={authStore.isAuthenticated && !!authStore.user?.telegram}
                 className={authStore.isAuthenticated && authStore.user?.telegram ? 'input--prefilled' : ''}
               />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="specLink">Ссылка на ТЗ (Google Docs)</label>
+              <input
+                type="url"
+                id="specLink"
+                name="specLink"
+                value={formData.specLink}
+                onChange={handleChange}
+                placeholder="https://docs.google.com/document/d/..."
+              />
+              <span className="form-hint">Необязательно. Если у вас есть готовое техническое задание.</span>
             </div>
 
             <div className="form-group">

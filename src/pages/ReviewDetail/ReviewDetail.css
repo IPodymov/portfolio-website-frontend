@@ -197,6 +197,14 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .review-detail {
+    padding: var(--space-2xl) 0;
+  }
+  
+  .review-detail__container {
+    padding: 0 var(--space-md);
+  }
+  
   .review-detail__card {
     padding: var(--space-lg);
   }
@@ -204,6 +212,10 @@
   .review-detail__header {
     flex-direction: column;
     gap: var(--space-lg);
+  }
+  
+  .review-detail__title {
+    font-size: var(--font-size-xl);
   }
   
   .review-detail__actions,
@@ -215,5 +227,21 @@
   .review-detail__avatar {
     width: 56px;
     height: 56px;
+    font-size: var(--font-size-lg);
+  }
+  
+  .review-detail__star {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .review-detail__card {
+    padding: var(--space-md);
+    border-radius: var(--radius-xl);
+  }
+  
+  .review-detail__content {
+    font-size: var(--font-size-sm);
   }
 }

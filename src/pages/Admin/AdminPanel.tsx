@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import type { ProjectStatus, Project, User, UserRole } from '../../types';
-import { authStore, adminStore } from '../../stores';
+import type { ProjectStatus, Project, User, UserRole, ContactRequest, ContactRequestStatus } from '../../types';
+import { authStore, adminStore, contactStore, notificationStore } from '../../stores';
 import { useNavigate } from 'react-router-dom';
 import { StatusBadge } from '../../components/StatusBadge';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
@@ -18,6 +18,11 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BuildIcon from '@mui/icons-material/Build';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import ContactMailIcon from '@mui/icons-material/ContactMail';
+import PersonIcon from '@mui/icons-material/Person';
+import TelegramIcon from '@mui/icons-material/Telegram';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 import './AdminPanel.css';
 
 const USER_ROLE_OPTIONS: { value: UserRole; label: string }[] = [
@@ -26,7 +31,13 @@ const USER_ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: 'admin', label: 'Администратор' },
 ];
 
-type TabType = 'dashboard' | 'users' | 'projects' | 'reviews';
+const CONTACT_STATUS_OPTIONS: { value: ContactRequestStatus; label: string }[] = [
+  { value: 'pending', label: 'Ожидает' },
+  { value: 'contacted', label: 'Связались' },
+  { value: 'closed', label: 'Закрыто' },
+];
+
+type TabType = 'dashboard' | 'users' | 'projects' | 'reviews' | 'requests' | 'notifications';
 
 interface EditUserForm {
   email: string;
@@ -42,6 +53,9 @@ const AdminPanel: React.FC = observer(() => {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ContactRequest | null>(null);
+  const [requestNotes, setRequestNotes] = useState('');
+  const [requestStatusFilter, setRequestStatusFilter] = useState<ContactRequestStatus | ''>('');
   const [editUserForm, setEditUserForm] = useState<EditUserForm>({
     email: '',
     firstName: '',
@@ -61,8 +75,17 @@ const AdminPanel: React.FC = observer(() => {
   useEffect(() => {
     if (authStore.user?.role === 'admin') {
       adminStore.loadDashboard();
+      contactStore.loadRequests();
+      contactStore.loadStats();
+      notificationStore.loadNotifications();
     }
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'requests' && authStore.user?.role === 'admin') {
+      contactStore.loadRequests(requestStatusFilter || undefined);
+    }
+  }, [activeTab, requestStatusFilter]);
 
   const handleStatusChange = async (projectId: number, newStatus: ProjectStatus) => {
     await adminStore.updateProjectStatus(projectId, newStatus);
@@ -134,10 +157,56 @@ const AdminPanel: React.FC = observer(() => {
     }
   };
 
+  const handleOpenRequest = (request: ContactRequest) => {
+    setSelectedRequest(request);
+    setRequestNotes(request.adminNotes || '');
+  };
+
+  const handleCloseRequest = () => {
+    setSelectedRequest(null);
+    setRequestNotes('');
+  };
+
+  const handleRequestStatusChange = async (requestId: number, newStatus: ContactRequestStatus) => {
+    await contactStore.updateRequestStatus(requestId, newStatus, requestNotes);
+    // Обновляем selectedRequest если он открыт
+    if (selectedRequest?.id === requestId) {
+      setSelectedRequest(prev => prev ? { ...prev, status: newStatus, adminNotes: requestNotes } : null);
+    }
+    contactStore.loadStats();
+  };
+
+  const handleSaveRequestNotes = async () => {
+    if (!selectedRequest) return;
+    await contactStore.updateRequestStatus(selectedRequest.id, selectedRequest.status, requestNotes);
+    setSelectedRequest(prev => prev ? { ...prev, adminNotes: requestNotes } : null);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getStatusBadgeClass = (status: ContactRequestStatus) => {
+    switch (status) {
+      case 'pending': return 'status-badge--pending';
+      case 'contacted': return 'status-badge--in-progress';
+      case 'closed': return 'status-badge--completed';
+      default: return '';
+    }
+  };
+
   if (authStore.isLoading || authStore.user?.role !== 'admin') return null;
 
   const tabs = [
     { id: 'dashboard' as TabType, label: 'Dashboard', icon: <DashboardIcon /> },
+    { id: 'notifications' as TabType, label: 'Уведомления', icon: <NotificationsIcon />, badge: notificationStore.unreadCount || undefined },
+    { id: 'requests' as TabType, label: 'Заявки', icon: <ContactMailIcon />, badge: contactStore.pendingCount },
     { id: 'users' as TabType, label: 'Пользователи', icon: <PeopleIcon /> },
     { id: 'projects' as TabType, label: 'Проекты', icon: <FolderIcon /> },
     { id: 'reviews' as TabType, label: 'Отзывы', icon: <StarIcon /> },
@@ -155,6 +224,7 @@ const AdminPanel: React.FC = observer(() => {
           >
             {tab.icon}
             <span>{tab.label}</span>
+            {tab.badge ? <span className="tab-badge">{tab.badge}</span> : null}
           </button>
         ))}
       </div>
@@ -171,6 +241,7 @@ const AdminPanel: React.FC = observer(() => {
             >
               {tab.icon}
               <span>{tab.label}</span>
+              {tab.badge ? <span className="tab-badge">{tab.badge}</span> : null}
             </button>
           ))}
         </nav>
@@ -421,6 +492,205 @@ const AdminPanel: React.FC = observer(() => {
                 </div>
               </div>
             )}
+
+            {/* Contact Requests Tab */}
+            {activeTab === 'requests' && (
+              <div className="admin-content">
+                <h1 className="admin-page-title">Заявки на связь</h1>
+                
+                {/* Статистика заявок */}
+                {contactStore.stats && (
+                  <div className="dashboard-stats dashboard-stats--compact">
+                    <div className="stat-card stat-card--small">
+                      <div className="stat-card__content">
+                        <span className="stat-card__value">{contactStore.stats.total}</span>
+                        <span className="stat-card__label">Всего</span>
+                      </div>
+                    </div>
+                    <div className="stat-card stat-card--small stat-card--warning">
+                      <div className="stat-card__content">
+                        <span className="stat-card__value">{contactStore.stats.pending}</span>
+                        <span className="stat-card__label">Ожидают</span>
+                      </div>
+                    </div>
+                    <div className="stat-card stat-card--small stat-card--info">
+                      <div className="stat-card__content">
+                        <span className="stat-card__value">{contactStore.stats.contacted}</span>
+                        <span className="stat-card__label">Связались</span>
+                      </div>
+                    </div>
+                    <div className="stat-card stat-card--small stat-card--success">
+                      <div className="stat-card__content">
+                        <span className="stat-card__value">{contactStore.stats.closed}</span>
+                        <span className="stat-card__label">Закрыто</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Фильтр по статусу */}
+                <div className="admin-filters">
+                  <label className="admin-filter">
+                    <span>Фильтр по статусу:</span>
+                    <select
+                      value={requestStatusFilter}
+                      onChange={(e) => setRequestStatusFilter(e.target.value as ContactRequestStatus | '')}
+                      className="form-select"
+                    >
+                      <option value="">Все заявки</option>
+                      {CONTACT_STATUS_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
+                {contactStore.isLoadingRequests ? (
+                  <LoadingSpinner />
+                ) : contactStore.requestsError ? (
+                  <div className="form-error">{contactStore.requestsError}</div>
+                ) : (
+                  <div className="admin-table-container">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Имя</th>
+                          <th>Telegram</th>
+                          <th>Сообщение</th>
+                          <th>Статус</th>
+                          <th>Пользователь</th>
+                          <th>Дата</th>
+                          <th>Действия</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {contactStore.requests.length === 0 ? (
+                          <tr>
+                            <td colSpan={8} className="admin-table__empty">
+                              Заявок не найдено
+                            </td>
+                          </tr>
+                        ) : (
+                          contactStore.requests.map(request => (
+                            <tr key={request.id} className={request.status === 'pending' ? 'row-highlight' : ''}>
+                              <td>{request.id}</td>
+                              <td>{request.name}</td>
+                              <td>
+                                <a 
+                                  href={`https://t.me/${request.telegram.replace('@', '')}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="telegram-link"
+                                >
+                                  <TelegramIcon fontSize="small" />
+                                  {request.telegram}
+                                </a>
+                              </td>
+                              <td className="message-cell" title={request.message}>
+                                {request.message.length > 50 
+                                  ? request.message.substring(0, 50) + '...' 
+                                  : request.message}
+                              </td>
+                              <td>
+                                <select
+                                  value={request.status}
+                                  onChange={(e) => handleRequestStatusChange(request.id, e.target.value as ContactRequestStatus)}
+                                  className={`status-select ${getStatusBadgeClass(request.status)}`}
+                                >
+                                  {CONTACT_STATUS_OPTIONS.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td>
+                                {request.user ? (
+                                  <span className="user-badge">
+                                    <PersonIcon fontSize="small" />
+                                    {request.user.firstName || request.user.email}
+                                  </span>
+                                ) : (
+                                  <span className="guest-badge">Гость</span>
+                                )}
+                              </td>
+                              <td>{formatDate(request.createdAt)}</td>
+                              <td>
+                                <button 
+                                  className="btn btn-sm btn-primary"
+                                  onClick={() => handleOpenRequest(request)}
+                                  title="Подробнее"
+                                >
+                                  <EditIcon fontSize="small" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Notifications Tab */}
+            {activeTab === 'notifications' && (
+              <div className="admin-content">
+                <div className="admin-page-header">
+                  <h1 className="admin-page-title">Уведомления</h1>
+                  {notificationStore.unreadCount > 0 && (
+                    <button 
+                      className="btn btn-outline btn-sm"
+                      onClick={() => notificationStore.markAllAsRead()}
+                    >
+                      <MarkEmailReadIcon fontSize="small" />
+                      Прочитать все
+                    </button>
+                  )}
+                </div>
+
+                {notificationStore.isLoading ? (
+                  <LoadingSpinner />
+                ) : notificationStore.error ? (
+                  <div className="form-error">{notificationStore.error}</div>
+                ) : notificationStore.notifications.length === 0 ? (
+                  <div className="admin-empty-state">
+                    <NotificationsIcon className="admin-empty-state__icon" />
+                    <p>Уведомлений пока нет</p>
+                  </div>
+                ) : (
+                  <div className="notifications-list">
+                    {notificationStore.notifications.map(notification => (
+                      <div 
+                        key={notification.id} 
+                        className={`notification-item ${!notification.isRead ? 'notification-item--unread' : ''}`}
+                      >
+                        <div className="notification-item__content">
+                          <div className="notification-item__icon">
+                            <NotificationsIcon fontSize="small" />
+                          </div>
+                          <div className="notification-item__body">
+                            <p className="notification-item__message">{notification.message}</p>
+                            <span className="notification-item__date">
+                              {formatDate(notification.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                        {!notification.isRead && (
+                          <button
+                            className="btn btn-sm btn-ghost notification-item__action"
+                            onClick={() => notificationStore.markAsRead(notification.id)}
+                            title="Отметить как прочитанное"
+                          >
+                            <MarkEmailReadIcon fontSize="small" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
@@ -609,6 +879,107 @@ const AdminPanel: React.FC = observer(() => {
             {adminStore.error && (
               <div className="form-error">{adminStore.error}</div>
             )}
+          </div>
+        )}
+      </Modal>
+
+      {/* Contact Request Details Modal */}
+      <Modal
+        isOpen={!!selectedRequest}
+        onClose={handleCloseRequest}
+        title={selectedRequest ? `Заявка #${selectedRequest.id}` : ''}
+        footer={
+          <>
+            <button 
+              className="btn btn-secondary"
+              onClick={handleCloseRequest}
+            >
+              Закрыть
+            </button>
+            <button 
+              className="btn btn-primary"
+              onClick={handleSaveRequestNotes}
+            >
+              Сохранить заметки
+            </button>
+          </>
+        }
+      >
+        {selectedRequest && (
+          <div className="request-details">
+            <div className="request-details__header">
+              <span className={`status-badge ${getStatusBadgeClass(selectedRequest.status)}`}>
+                {CONTACT_STATUS_OPTIONS.find(o => o.value === selectedRequest.status)?.label}
+              </span>
+              <span className="request-details__date">{formatDate(selectedRequest.createdAt)}</span>
+            </div>
+
+            <div className="request-details__row">
+              <span className="request-details__label">Имя:</span>
+              <span className="request-details__value">{selectedRequest.name}</span>
+            </div>
+
+            <div className="request-details__row">
+              <span className="request-details__label">Telegram:</span>
+              <a 
+                href={`https://t.me/${selectedRequest.telegram.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="request-details__link telegram-link"
+              >
+                <TelegramIcon fontSize="small" />
+                {selectedRequest.telegram}
+              </a>
+            </div>
+
+            {selectedRequest.user && (
+              <div className="request-details__row">
+                <span className="request-details__label">Пользователь:</span>
+                <span className="request-details__value user-badge">
+                  <PersonIcon fontSize="small" />
+                  {selectedRequest.user.firstName} {selectedRequest.user.lastName}
+                  {selectedRequest.user.email && <span className="user-email">({selectedRequest.user.email})</span>}
+                </span>
+              </div>
+            )}
+
+            <div className="request-details__message">
+              <span className="request-details__label">Сообщение:</span>
+              <div className="request-details__text">{selectedRequest.message}</div>
+            </div>
+
+            <div className="request-details__status">
+              <span className="request-details__label">Изменить статус:</span>
+              <select
+                value={selectedRequest.status}
+                onChange={(e) => handleRequestStatusChange(selectedRequest.id, e.target.value as ContactRequestStatus)}
+                className={`form-select ${getStatusBadgeClass(selectedRequest.status)}`}
+              >
+                {CONTACT_STATUS_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {selectedRequest.handledBy && (
+              <div className="request-details__row">
+                <span className="request-details__label">Обработал:</span>
+                <span className="request-details__value">
+                  {selectedRequest.handledBy.firstName} {selectedRequest.handledBy.lastName}
+                </span>
+              </div>
+            )}
+
+            <div className="request-details__notes">
+              <label className="request-details__label">Заметки администратора:</label>
+              <textarea
+                className="form-textarea"
+                value={requestNotes}
+                onChange={(e) => setRequestNotes(e.target.value)}
+                placeholder="Добавьте заметки о взаимодействии с клиентом..."
+                rows={4}
+              />
+            </div>
           </div>
         )}
       </Modal>

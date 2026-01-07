@@ -187,11 +187,47 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .privacy {
+    padding: var(--space-2xl) 0;
+  }
+  
+  .privacy__container {
+    padding: 0 var(--space-md);
+  }
+  
   .privacy__content {
     padding: var(--space-lg);
   }
   
   .privacy__title {
     font-size: var(--font-size-3xl);
+  }
+  
+  .privacy__section-title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .privacy__text,
+  .privacy__list-item {
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .privacy__content {
+    padding: var(--space-md);
+    border-radius: var(--radius-xl);
+  }
+  
+  .privacy__title {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .privacy__toc {
+    padding: var(--space-md);
+  }
+  
+  .privacy__highlight {
+    padding: var(--space-md);
   }
 }

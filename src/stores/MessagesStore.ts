@@ -88,10 +88,13 @@ class MessagesStore {
       runInAction(() => {
         this.currentMessages.push(response.data);
         
-        // Update conversation
+        // Update conversation or create new one
         const convIndex = this.conversations.findIndex(c => c.user.id === receiverId);
         if (convIndex >= 0) {
           this.conversations[convIndex].lastMessage = response.data;
+        } else {
+          // If no conversation exists, reload conversations to get the new one
+          this.loadConversations();
         }
       });
       
