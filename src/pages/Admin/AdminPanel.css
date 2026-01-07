@@ -662,6 +662,17 @@
   margin-top: var(--space-sm);
 }
 
+.project-edit__sync-btn {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.project-edit__sync-btn svg {
+  font-size: 18px;
+}
+
 .project-edit__history-list {
   display: flex;
   flex-direction: column;

@@ -27,6 +27,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import LinkIcon from '@mui/icons-material/Link';
 import AddIcon from '@mui/icons-material/Add';
 import HistoryIcon from '@mui/icons-material/History';
+import SyncIcon from '@mui/icons-material/Sync';
 import './AdminPanel.css';
 
 const USER_ROLE_OPTIONS: { value: UserRole; label: string }[] = [
@@ -211,7 +212,6 @@ const AdminPanel: React.FC = observer(() => {
       editProjectForm.githubRepoLink,
       editProjectForm.specLink
     );
-    setIsSavingProject(false);
     
     if (success) {
       // Обновляем локальное состояние
@@ -220,7 +220,19 @@ const AdminPanel: React.FC = observer(() => {
         githubRepoLink: editProjectForm.githubRepoLink || undefined,
         specLink: editProjectForm.specLink || undefined,
       } : null);
+      
+      // Автоматически синхронизируем коммиты если добавлена ссылка на GitHub
+      if (editProjectForm.githubRepoLink) {
+        await adminStore.syncProjectCommits(editingProject.id);
+        // Обновляем проект из store после синхронизации
+        const updatedProject = adminStore.projects.find(p => p.id === editingProject.id);
+        if (updatedProject) {
+          setEditingProject(updatedProject);
+        }
+      }
     }
+    
+    setIsSavingProject(false);
   };
 
   const handleAddHistoryEntry = async () => {
@@ -240,6 +252,22 @@ const AdminPanel: React.FC = observer(() => {
         setEditingProject(updatedProject);
       }
       setEditProjectForm(prev => ({ ...prev, newHistoryEntry: '' }));
+    }
+  };
+
+  const handleSyncCommits = async () => {
+    if (!editingProject || !editingProject.githubRepoLink) return;
+    
+    setIsSavingProject(true);
+    const success = await adminStore.syncProjectCommits(editingProject.id);
+    setIsSavingProject(false);
+    
+    if (success) {
+      // Обновляем проект из store
+      const updatedProject = adminStore.projects.find(p => p.id === editingProject.id);
+      if (updatedProject) {
+        setEditingProject(updatedProject);
+      }
     }
   };
 
@@ -936,6 +964,17 @@ const AdminPanel: React.FC = observer(() => {
               >
                 {isSavingProject ? 'Сохранение...' : 'Сохранить ссылки'}
               </button>
+              
+              {editingProject.githubRepoLink && (
+                <button 
+                  className="btn btn-secondary project-edit__sync-btn"
+                  onClick={handleSyncCommits}
+                  disabled={isSavingProject}
+                >
+                  <SyncIcon fontSize="small" />
+                  {isSavingProject ? 'Синхронизация...' : 'Синхронизировать коммиты'}
+                </button>
+              )}
             </div>
             
             <div className="project-edit__divider" />
@@ -948,7 +987,9 @@ const AdminPanel: React.FC = observer(() => {
               
               <div className="project-edit__history-list">
                 {editingProject.history && editingProject.history.length > 0 ? (
-                  editingProject.history.map((entry) => (
+                  [...editingProject.history].sort((a, b) => 
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                  ).map((entry) => (
                     <div key={entry.id} className="project-edit__history-item">
                       <span className="project-edit__history-date">
                         {new Date(entry.createdAt).toLocaleDateString('ru-RU', {

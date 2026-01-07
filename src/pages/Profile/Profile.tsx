@@ -559,26 +559,46 @@ const Profile: React.FC = observer(() => {
                           <div className="profile-project__timeline">
                             {[...project.history].sort((a, b) => 
                               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                            ).map((entry, index, sortedHistory) => (
-                              <div key={entry.id} className="profile-project__timeline-item">
-                                <div className="profile-project__timeline-dot" />
-                                {index < sortedHistory.length - 1 && (
-                                  <div className="profile-project__timeline-line" />
-                                )}
-                                <div className="profile-project__timeline-content">
-                                  <span className="profile-project__timeline-date">
-                                    {new Date(entry.createdAt).toLocaleDateString('ru-RU', {
-                                      day: 'numeric',
-                                      month: 'short',
-                                      year: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })}
-                                  </span>
-                                  <p className="profile-project__timeline-text">{entry.description}</p>
+                            ).map((entry, index, sortedHistory) => {
+                              // Проверяем, есть ли SHA коммита в описании (формат: "текст (abc1234)")
+                              const commitMatch = entry.description.match(/^(.+?)\s*\(([a-f0-9]{7})\)$/);
+                              const isCommit = commitMatch && project.githubRepoLink;
+                              
+                              return (
+                                <div key={entry.id} className="profile-project__timeline-item">
+                                  <div className={`profile-project__timeline-dot ${isCommit ? 'profile-project__timeline-dot--commit' : ''}`} />
+                                  {index < sortedHistory.length - 1 && (
+                                    <div className="profile-project__timeline-line" />
+                                  )}
+                                  <div className="profile-project__timeline-content">
+                                    <span className="profile-project__timeline-date">
+                                      {new Date(entry.createdAt).toLocaleDateString('ru-RU', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                    {isCommit && commitMatch ? (
+                                      <p className="profile-project__timeline-text">
+                                        {commitMatch[1]}{' '}
+                                        <a 
+                                          href={`${project.githubRepoLink}/commit/${commitMatch[2]}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="profile-project__commit-link"
+                                        >
+                                          ({commitMatch[2]})
+                                        </a>
+                                      </p>
+                                    ) : (
+                                      <p className="profile-project__timeline-text">{entry.description}</p>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       )}

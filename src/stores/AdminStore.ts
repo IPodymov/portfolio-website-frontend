@@ -218,6 +218,26 @@ class AdminStore {
     }
   }
 
+  async syncProjectCommits(projectId: number): Promise<boolean> {
+    this.error = null;
+    
+    try {
+      await api.post(`/admin/projects/${projectId}/sync-commits`);
+      // Перезагружаем проект чтобы получить обновлённую историю
+      const response = await api.get<Project[]>('/admin/projects');
+      runInAction(() => {
+        this.projects = response.data;
+      });
+      return true;
+    } catch (err) {
+      console.error('Failed to sync commits', err);
+      runInAction(() => {
+        this.error = 'Не удалось синхронизировать коммиты';
+      });
+      return false;
+    }
+  }
+
   clearError() {
     this.error = null;
   }

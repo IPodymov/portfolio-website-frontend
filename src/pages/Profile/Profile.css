@@ -781,6 +781,10 @@
   z-index: 1;
 }
 
+.profile-project__timeline-dot--commit {
+  background: #10b981;
+}
+
 .profile-project__timeline-line {
   position: absolute;
   left: 4px;
@@ -807,6 +811,19 @@
   color: #475569;
   line-height: 1.5;
   margin: 0;
+}
+
+.profile-project__commit-link {
+  color: #6366f1;
+  font-family: 'SF Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.8125rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.profile-project__commit-link:hover {
+  color: #4f46e5;
+  text-decoration: underline;
 }
 
 /* Responsive for Projects */
