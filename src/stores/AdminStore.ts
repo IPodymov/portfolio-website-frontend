@@ -175,6 +175,49 @@ class AdminStore {
     }
   }
 
+  async updateProjectLinks(projectId: number, githubRepoLink: string, specLink: string): Promise<boolean> {
+    this.error = null;
+    
+    try {
+      const response = await api.put<Project>(`/admin/projects/${projectId}/links`, { 
+        githubRepoLink: githubRepoLink || null, 
+        specLink: specLink || null 
+      });
+      runInAction(() => {
+        this.projects = this.projects.map(p => 
+          p.id === projectId ? { ...p, ...response.data } : p
+        );
+      });
+      return true;
+    } catch (err) {
+      console.error('Failed to update project links', err);
+      runInAction(() => {
+        this.error = 'Не удалось обновить ссылки проекта';
+      });
+      return false;
+    }
+  }
+
+  async addProjectHistory(projectId: number, description: string): Promise<boolean> {
+    this.error = null;
+    
+    try {
+      const response = await api.post<Project>(`/projects/${projectId}/history`, { description });
+      runInAction(() => {
+        this.projects = this.projects.map(p => 
+          p.id === projectId ? response.data : p
+        );
+      });
+      return true;
+    } catch (err) {
+      console.error('Failed to add project history', err);
+      runInAction(() => {
+        this.error = 'Не удалось добавить запись в историю';
+      });
+      return false;
+    }
+  }
+
   clearError() {
     this.error = null;
   }

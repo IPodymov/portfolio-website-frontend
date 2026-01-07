@@ -23,6 +23,10 @@ import PersonIcon from '@mui/icons-material/Person';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import LinkIcon from '@mui/icons-material/Link';
+import AddIcon from '@mui/icons-material/Add';
+import HistoryIcon from '@mui/icons-material/History';
 import './AdminPanel.css';
 
 const USER_ROLE_OPTIONS: { value: UserRole; label: string }[] = [
@@ -65,21 +69,34 @@ const AdminPanel: React.FC = observer(() => {
     password: '',
   });
   const [isSavingUser, setIsSavingUser] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editProjectForm, setEditProjectForm] = useState({
+    githubRepoLink: '',
+    specLink: '',
+    newHistoryEntry: '',
+  });
+  const [isSavingProject, setIsSavingProject] = useState(false);
 
   useEffect(() => {
-    if (!authStore.isLoading && authStore.user?.role !== 'admin') {
+    // Ждём окончания проверки авторизации
+    if (authStore.isLoading) return;
+    
+    if (authStore.user?.role !== 'admin') {
       navigate('/');
     }
-  }, [navigate]);
+  }, [navigate, authStore.isLoading, authStore.user?.role]);
 
   useEffect(() => {
+    // Ждём окончания проверки авторизации
+    if (authStore.isLoading) return;
+    
     if (authStore.user?.role === 'admin') {
       adminStore.loadDashboard();
       contactStore.loadRequests();
       contactStore.loadStats();
       notificationStore.loadNotifications();
     }
-  }, []);
+  }, [authStore.isLoading, authStore.user?.role]);
 
   useEffect(() => {
     if (activeTab === 'requests' && authStore.user?.role === 'admin') {
@@ -167,6 +184,65 @@ const AdminPanel: React.FC = observer(() => {
     setRequestNotes('');
   };
 
+  const handleEditProject = (project: Project) => {
+    setEditingProject(project);
+    setEditProjectForm({
+      githubRepoLink: project.githubRepoLink || '',
+      specLink: project.specLink || '',
+      newHistoryEntry: '',
+    });
+  };
+
+  const handleCloseProjectModal = () => {
+    setEditingProject(null);
+    setEditProjectForm({
+      githubRepoLink: '',
+      specLink: '',
+      newHistoryEntry: '',
+    });
+  };
+
+  const handleSaveProjectLinks = async () => {
+    if (!editingProject) return;
+    
+    setIsSavingProject(true);
+    const success = await adminStore.updateProjectLinks(
+      editingProject.id,
+      editProjectForm.githubRepoLink,
+      editProjectForm.specLink
+    );
+    setIsSavingProject(false);
+    
+    if (success) {
+      // Обновляем локальное состояние
+      setEditingProject(prev => prev ? {
+        ...prev,
+        githubRepoLink: editProjectForm.githubRepoLink || undefined,
+        specLink: editProjectForm.specLink || undefined,
+      } : null);
+    }
+  };
+
+  const handleAddHistoryEntry = async () => {
+    if (!editingProject || !editProjectForm.newHistoryEntry.trim()) return;
+    
+    setIsSavingProject(true);
+    const success = await adminStore.addProjectHistory(
+      editingProject.id,
+      editProjectForm.newHistoryEntry.trim()
+    );
+    setIsSavingProject(false);
+    
+    if (success) {
+      // Обновляем проект из store
+      const updatedProject = adminStore.projects.find(p => p.id === editingProject.id);
+      if (updatedProject) {
+        setEditingProject(updatedProject);
+      }
+      setEditProjectForm(prev => ({ ...prev, newHistoryEntry: '' }));
+    }
+  };
+
   const handleRequestStatusChange = async (requestId: number, newStatus: ContactRequestStatus) => {
     await contactStore.updateRequestStatus(requestId, newStatus, requestNotes);
     // Обновляем selectedRequest если он открыт
@@ -211,6 +287,16 @@ const AdminPanel: React.FC = observer(() => {
     { id: 'projects' as TabType, label: 'Проекты', icon: <FolderIcon /> },
     { id: 'reviews' as TabType, label: 'Отзывы', icon: <StarIcon /> },
   ];
+
+  // Показываем загрузку пока проверяется авторизация
+  if (authStore.isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  // Если не админ, ничего не показываем (будет редирект)
+  if (authStore.user?.role !== 'admin') {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="admin-panel">
@@ -438,12 +524,21 @@ const AdminPanel: React.FC = observer(() => {
                           <td data-label="Telegram">{p.telegram}</td>
                           <td data-label="Дата">{new Date(p.createdAt).toLocaleDateString('ru-RU')}</td>
                           <td data-label="Действия">
-                            <button 
-                              className="btn btn-sm btn-outline"
-                              onClick={() => setSelectedProject(p)}
-                            >
-                              Детали
-                            </button>
+                            <div className="admin-table__actions">
+                              <button 
+                                className="btn btn-sm btn-outline"
+                                onClick={() => setSelectedProject(p)}
+                              >
+                                Детали
+                              </button>
+                              <button 
+                                className="btn btn-sm btn-primary"
+                                onClick={() => handleEditProject(p)}
+                              >
+                                <EditIcon fontSize="small" />
+                                Редактировать
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -777,6 +872,119 @@ const AdminPanel: React.FC = observer(() => {
             <div className="project-details__description">
               <span className="project-details__label">Описание:</span>
               <p className="project-details__text">{selectedProject.description || 'Описание отсутствует'}</p>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Edit Project Modal */}
+      <Modal
+        isOpen={!!editingProject}
+        onClose={handleCloseProjectModal}
+        title={editingProject ? `Редактирование проекта #${editingProject.id}` : ''}
+        footer={
+          <button 
+            className="btn btn-secondary"
+            onClick={handleCloseProjectModal}
+          >
+            Закрыть
+          </button>
+        }
+      >
+        {editingProject && (
+          <div className="project-edit">
+            <div className="project-edit__section">
+              <h3 className="project-edit__title">
+                <LinkIcon fontSize="small" />
+                Ссылки проекта
+              </h3>
+              
+              <div className="project-edit__field">
+                <label className="project-edit__label">
+                  <GitHubIcon fontSize="small" />
+                  Ссылка на GitHub
+                </label>
+                <input
+                  type="url"
+                  value={editProjectForm.githubRepoLink}
+                  onChange={(e) => setEditProjectForm(prev => ({ ...prev, githubRepoLink: e.target.value }))}
+                  placeholder="https://github.com/username/repo"
+                  className="project-edit__input"
+                  disabled={isSavingProject}
+                />
+              </div>
+              
+              <div className="project-edit__field">
+                <label className="project-edit__label">
+                  <LinkIcon fontSize="small" />
+                  Ссылка на спецификацию
+                </label>
+                <input
+                  type="url"
+                  value={editProjectForm.specLink}
+                  onChange={(e) => setEditProjectForm(prev => ({ ...prev, specLink: e.target.value }))}
+                  placeholder="https://docs.google.com/..."
+                  className="project-edit__input"
+                  disabled={isSavingProject}
+                />
+              </div>
+              
+              <button 
+                className="btn btn-primary project-edit__save-btn"
+                onClick={handleSaveProjectLinks}
+                disabled={isSavingProject}
+              >
+                {isSavingProject ? 'Сохранение...' : 'Сохранить ссылки'}
+              </button>
+            </div>
+            
+            <div className="project-edit__divider" />
+            
+            <div className="project-edit__section">
+              <h3 className="project-edit__title">
+                <HistoryIcon fontSize="small" />
+                История проекта
+              </h3>
+              
+              <div className="project-edit__history-list">
+                {editingProject.history && editingProject.history.length > 0 ? (
+                  editingProject.history.map((entry) => (
+                    <div key={entry.id} className="project-edit__history-item">
+                      <span className="project-edit__history-date">
+                        {new Date(entry.createdAt).toLocaleDateString('ru-RU', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                      <span className="project-edit__history-text">{entry.description}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="project-edit__history-empty">История пуста</p>
+                )}
+              </div>
+              
+              <div className="project-edit__add-history">
+                <textarea
+                  value={editProjectForm.newHistoryEntry}
+                  onChange={(e) => setEditProjectForm(prev => ({ ...prev, newHistoryEntry: e.target.value }))}
+                  placeholder="Добавить запись в историю..."
+                  className="project-edit__textarea"
+                  disabled={isSavingProject}
+                  rows={3}
+                />
+                <button 
+                  className="btn btn-primary project-edit__add-btn"
+                  onClick={handleAddHistoryEntry}
+                  disabled={isSavingProject || !editProjectForm.newHistoryEntry.trim()}
+                >
+                  <AddIcon fontSize="small" />
+                  Добавить запись
+                </button>
+              </div>
             </div>
           </div>
         )}

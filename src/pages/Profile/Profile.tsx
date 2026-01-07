@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { authStore } from '../../stores';
+import { authStore, projectsStore } from '../../stores';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
+import { StatusBadge } from '../../components/StatusBadge';
+import { PROJECT_TYPE_LABELS } from '../../constants';
 import EmailIcon from '@mui/icons-material/Email';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -10,6 +12,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import LockIcon from '@mui/icons-material/Lock';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
+import FolderIcon from '@mui/icons-material/Folder';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import DescriptionIcon from '@mui/icons-material/Description';
+import HistoryIcon from '@mui/icons-material/History';
 import './Profile.css';
 
 const Profile: React.FC = observer(() => {
@@ -18,6 +26,7 @@ const Profile: React.FC = observer(() => {
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
+  const [expandedProjectId, setExpandedProjectId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -33,6 +42,9 @@ const Profile: React.FC = observer(() => {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
+    // Ждём окончания проверки авторизации
+    if (authStore.isLoading) return;
+    
     if (!authStore.isAuthenticated) {
       navigate('/login');
       return;
@@ -44,7 +56,9 @@ const Profile: React.FC = observer(() => {
         telegram: authStore.user.telegram || ''
       });
     }
-  }, [navigate]);
+    // Загружаем проекты пользователя
+    projectsStore.loadMyProjects();
+  }, [navigate, authStore.isLoading, authStore.isAuthenticated]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -195,15 +209,16 @@ const Profile: React.FC = observer(() => {
     setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
   };
 
-  if (!authStore.user) {
+  if (authStore.isLoading || !authStore.user) {
     return <LoadingSpinner />;
   }
 
   return (
     <div className="profile-page">
       <div className="profile-container">
-        {/* Profile Card */}
-        <div className="profile-card">
+        {/* Left Column - Profile Card */}
+        <div className="profile-column profile-column--left">
+          <div className="profile-card">
           {/* Header with Avatar */}
           <div className="profile-card__header">
             <div className="profile-avatar-wrapper">
@@ -433,6 +448,147 @@ const Profile: React.FC = observer(() => {
               </div>
             </div>
           )}
+        </div>
+        </div>
+
+        {/* Right Column - Projects */}
+        <div className="profile-column profile-column--right">
+          <div className="profile-projects">
+          <div className="profile-projects__header">
+            <FolderIcon className="profile-projects__icon" />
+            <h2 className="profile-projects__title">Мои проекты</h2>
+            <span className="profile-projects__count">{projectsStore.myProjects.length}</span>
+          </div>
+
+          {projectsStore.isLoading ? (
+            <div className="profile-projects__loading">
+              <LoadingSpinner />
+            </div>
+          ) : projectsStore.myProjects.length === 0 ? (
+            <div className="profile-projects__empty">
+              <p>У вас пока нет проектов</p>
+              <button 
+                className="btn btn-primary"
+                onClick={() => navigate('/order')}
+              >
+                Заказать проект
+              </button>
+            </div>
+          ) : (
+            <div className="profile-projects__list">
+              {projectsStore.myProjects.map(project => (
+                <div key={project.id} className="profile-project">
+                  <div 
+                    className="profile-project__header"
+                    onClick={() => setExpandedProjectId(
+                      expandedProjectId === project.id ? null : project.id
+                    )}
+                  >
+                    <div className="profile-project__main">
+                      <span className="profile-project__type">
+                        {PROJECT_TYPE_LABELS[project.type]}
+                      </span>
+                      <StatusBadge status={project.status} size="sm" />
+                    </div>
+                    <div className="profile-project__toggle">
+                      {expandedProjectId === project.id ? (
+                        <ExpandLessIcon />
+                      ) : (
+                        <ExpandMoreIcon />
+                      )}
+                    </div>
+                  </div>
+
+                  {expandedProjectId === project.id && (
+                    <div className="profile-project__details">
+                      <div className="profile-project__info">
+                        <div className="profile-project__row">
+                          <span className="profile-project__label">Дата создания:</span>
+                          <span className="profile-project__value">
+                            {new Date(project.createdAt).toLocaleDateString('ru-RU', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                        
+                        {project.description && (
+                          <div className="profile-project__row profile-project__row--full">
+                            <span className="profile-project__label">Описание:</span>
+                            <p className="profile-project__description">{project.description}</p>
+                          </div>
+                        )}
+
+                        {/* Links */}
+                        {(project.githubRepoLink || project.specLink) && (
+                          <div className="profile-project__links">
+                            {project.githubRepoLink && (
+                              <a 
+                                href={project.githubRepoLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="profile-project__link"
+                              >
+                                <GitHubIcon />
+                                <span>GitHub</span>
+                              </a>
+                            )}
+                            {project.specLink && (
+                              <a 
+                                href={project.specLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="profile-project__link"
+                              >
+                                <DescriptionIcon />
+                                <span>Спецификация</span>
+                              </a>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* History Timeline */}
+                      {project.history && project.history.length > 0 && (
+                        <div className="profile-project__history">
+                          <div className="profile-project__history-title">
+                            <HistoryIcon />
+                            <span>История проекта</span>
+                          </div>
+                          <div className="profile-project__timeline">
+                            {[...project.history].sort((a, b) => 
+                              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                            ).map((entry, index, sortedHistory) => (
+                              <div key={entry.id} className="profile-project__timeline-item">
+                                <div className="profile-project__timeline-dot" />
+                                {index < sortedHistory.length - 1 && (
+                                  <div className="profile-project__timeline-line" />
+                                )}
+                                <div className="profile-project__timeline-content">
+                                  <span className="profile-project__timeline-date">
+                                    {new Date(entry.createdAt).toLocaleDateString('ru-RU', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                  <p className="profile-project__timeline-text">{entry.description}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          </div>
         </div>
       </div>
     </div>
