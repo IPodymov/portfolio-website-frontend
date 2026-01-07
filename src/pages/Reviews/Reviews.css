@@ -159,6 +159,19 @@
   border-top: 1px solid var(--color-bg-secondary);
 }
 
+.review-card__quality {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+}
+
+.review-card__date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
 .review-card__read-more {
   font-size: var(--font-size-sm);
   font-weight: 500;
@@ -246,6 +259,13 @@
   display: flex;
   gap: var(--space-md);
   margin-top: var(--space-lg);
+}
+
+.form-hint {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
 }
 
 /* Empty State */

@@ -61,6 +61,7 @@ export interface ContactFormRequest {
 export interface CreateReviewRequest {
   body: string;
   projectLink?: string;
+  projectId?: number;
   rating: number;
   serviceQuality: ServiceQuality;
 }
@@ -128,7 +129,17 @@ export interface Review {
   serviceQuality: ServiceQuality | string;
   user: User;
   username: string; // добавляется бэкендом
+  project?: Project;
+  githubCommits?: GitHubCommit[];
   createdAt: string;
+}
+
+export interface GitHubCommit {
+  sha: string;
+  message: string;
+  author: string;
+  date: string;
+  html_url: string;
 }
 
 export interface Notification {

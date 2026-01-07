@@ -38,13 +38,14 @@ class ReviewsStore {
     this.currentReview = null;
     
     try {
+      // Backend поддерживает GET /reviews/:id с полной информацией о проекте
       const response = await api.get<Review>(`/reviews/${id}`);
       runInAction(() => {
         this.currentReview = response.data;
       });
-    } catch {
+    } catch (err) {
       runInAction(() => {
-        this.error = 'Не удалось загрузить отзыв';
+        this.error = err instanceof Error ? err.message : 'Не удалось загрузить отзыв';
       });
     } finally {
       runInAction(() => {

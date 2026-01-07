@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import type { CreateReviewRequest } from '../../types';
 import { ServiceQuality } from '../../types';
-import { authStore, reviewsStore } from '../../stores';
+import { authStore, reviewsStore, projectsStore } from '../../stores';
 import { StarRating } from '../../components/StarRating';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { SERVICE_QUALITY_OPTIONS, SERVICE_QUALITY_LABELS } from '../../constants';
@@ -14,13 +14,20 @@ const Reviews: React.FC = observer(() => {
   const [formData, setFormData] = useState<CreateReviewRequest>({
     body: '',
     projectLink: '',
+    projectId: undefined,
     rating: 5,
     serviceQuality: ServiceQuality.EXCELLENT
   });
   const [submitting, setSubmitting] = useState(false);
 
+  // Загружаем проекты пользователя для выбора в форме
+  const completedProjects = projectsStore.myProjects.filter(p => p.status === 'completed');
+
   useEffect(() => {
     reviewsStore.loadReviews();
+    if (authStore.isAuthenticated) {
+      projectsStore.loadMyProjects();
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,6 +41,7 @@ const Reviews: React.FC = observer(() => {
       setFormData({
         body: '',
         projectLink: '',
+        projectId: undefined,
         rating: 5,
         serviceQuality: ServiceQuality.EXCELLENT
       });
@@ -90,8 +98,30 @@ const Reviews: React.FC = observer(() => {
             </select>
           </div>
 
+          {completedProjects.length > 0 && (
+            <div className="form-group">
+              <label className="form-label">Выберите проект (опционально)</label>
+              <select
+                value={formData.projectId || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  projectId: e.target.value ? Number(e.target.value) : undefined
+                }))}
+                className="form-control"
+              >
+                <option value="">Без привязки к проекту</option>
+                {completedProjects.map(project => (
+                  <option key={project.id} value={project.id}>
+                    {project.title || project.clientName} ({project.type})
+                  </option>
+                ))}
+              </select>
+              <span className="form-hint">Выбрав проект, вы покажете историю его разработки</span>
+            </div>
+          )}
+
           <div className="form-group">
-            <label className="form-label">Ссылка на проект (опционально)</label>
+            <label className="form-label">Ссылка на результат (опционально)</label>
             <input
               type="url"
               value={formData.projectLink}
@@ -124,19 +154,19 @@ const Reviews: React.FC = observer(() => {
           <p className="text-center">Отзывов пока нет</p>
         ) : (
           reviewsStore.reviews.map((review) => (
-            <Link to={`/reviews/${review.id}`} key={review.id} className="reviews__card card">
-              <div className="reviews__card-header">
-                <div className="reviews__card-author">
+            <Link to={`/reviews/${review.id}`} key={review.id} className="review-card card">
+              <div className="review-card__header">
+                <div className="review-card__author">
                   {review.username || `${review.user?.firstName || ''} ${review.user?.lastName || ''}`.trim() || 'Аноним'}
                 </div>
                 <StarRating rating={review.rating} />
               </div>
-              <p className="reviews__card-body">{review.body}</p>
-              <div className="reviews__card-footer">
-                <span className="reviews__card-quality">
+              <p className="review-card__content">{review.body}</p>
+              <div className="review-card__footer">
+                <span className="review-card__quality">
                   {SERVICE_QUALITY_LABELS[review.serviceQuality as ServiceQuality] || review.serviceQuality}
                 </span>
-                <span className="reviews__card-date">
+                <span className="review-card__date">
                   {new Date(review.createdAt).toLocaleDateString('ru-RU')}
                 </span>
               </div>
