@@ -1,18 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import EmailIcon from '@mui/icons-material/Email';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import { contactApi } from '../../api/contact';
+import { contactStore } from '../../stores';
 import './Contacts.css';
 
-const Contacts: React.FC = () => {
+const Contacts: React.FC = observer(() => {
   const [formData, setFormData] = useState({
     name: '',
     telegram: '',
     message: '',
   });
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-  const [error, setError] = useState('');
+
+  useEffect(() => {
+    return () => {
+      contactStore.reset();
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -21,18 +26,10 @@ const Contacts: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('submitting');
-    setError('');
-
-    try {
-      await contactApi.sendMessage(formData);
-      setStatus('success');
+    const success = await contactStore.sendMessage(formData);
+    if (success) {
       setFormData({ name: '', telegram: '', message: '' });
-      setTimeout(() => setStatus('idle'), 3000);
-    } catch (err: unknown) {
-      setStatus('error');
-      const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Ошибка отправки. Попробуйте позже.');
+      setTimeout(() => contactStore.reset(), 3000);
     }
   };
 
@@ -135,20 +132,20 @@ const Contacts: React.FC = () => {
             <button
               type="submit"
               className="btn btn-primary btn-block"
-              disabled={status === 'submitting'}>
-              {status === 'submitting' ? 'Отправка...' : 'Отправить сообщение'}
+              disabled={contactStore.isSubmitting}>
+              {contactStore.isSubmitting ? 'Отправка...' : 'Отправить сообщение'}
             </button>
 
-            {status === 'success' && (
+            {contactStore.isSuccess && (
               <div className="success-message">Спасибо! Ваше сообщение отправлено.</div>
             )}
 
-            {status === 'error' && <div className="error-message">{error}</div>}
+            {contactStore.error && <div className="error-message">{contactStore.error}</div>}
           </form>
         </div>
       </div>
     </div>
   );
-};
+});
 
 export default Contacts;

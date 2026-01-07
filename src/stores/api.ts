@@ -26,7 +26,6 @@ api.interceptors.response.use(
     // Handle 401 errors - unauthorized
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      // Optionally redirect to login
     }
     return Promise.reject(error);
   }

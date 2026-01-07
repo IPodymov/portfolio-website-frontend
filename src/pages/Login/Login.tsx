@@ -1,39 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { authApi } from '../../api/auth';
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../../stores';
 import './Login.css';
 
-const Login: React.FC = () => {
+const Login: React.FC = observer(() => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    authStore.clearError();
     setLoading(true);
     
-    try {
-      const response = await authApi.login({ email, password });
-      login(response.user);
+    const success = await authStore.loginUser({ email, password });
+    
+    if (success) {
       navigate('/');
-    } catch {
-      setError('Ошибка входа. Проверьте данные.');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card card">
-        <h2 className="auth-title">Вход</h2>
-        {error && <div className="form-error">{error}</div>}
-        <form onSubmit={handleSubmit}>
+    <div className="auth">
+      <div className="auth__card">
+        <div className="auth__header">
+          <h2 className="auth__title">Вход</h2>
+          <p className="auth__subtitle">Войдите в свой аккаунт</p>
+        </div>
+        {authStore.error && <div className="form-error">{authStore.error}</div>}
+        <form onSubmit={handleSubmit} className="auth__form">
           <div className="form-group">
             <label className="form-label">Email</label>
             <input
@@ -42,6 +41,7 @@ const Login: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="form-control"
+              placeholder="example@mail.com"
               disabled={loading}
             />
           </div>
@@ -53,19 +53,20 @@ const Login: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="form-control"
+              placeholder="••••••••"
               disabled={loading}
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+          <button type="submit" className="btn btn--primary btn--block" disabled={loading}>
             {loading ? 'Вход...' : 'Войти'}
           </button>
         </form>
-        <p className="auth-footer">
-          Нет аккаунта? <Link to="/register" className="link-accent">Зарегистрироваться</Link>
-        </p>
+        <div className="auth__footer">
+          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+        </div>
       </div>
     </div>
   );
-};
+});
 
 export default Login;

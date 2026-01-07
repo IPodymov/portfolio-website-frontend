@@ -1,76 +1,62 @@
+/* ========================================
+   LAYOUT COMPONENT - BEM
+   ======================================== */
+
 .layout {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
+/* Main Content */
 .layout__main {
   flex: 1;
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+  padding-top: 80px;
 }
 
-/* Auth pages should fill available space */
-.layout__main:has(.auth-page) {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  max-width: 100%;
-}
-
-/* Admin panel - full width, no footer */
-.layout__main:has(.admin-panel) {
-  padding: 2rem;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.layout:has(.admin-panel) .layout__footer {
-  display: none;
-}
-
+/* Footer */
 .layout__footer {
-  background-color: var(--color-primary);
-  color: white;
-  padding: 1.5rem;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  padding: var(--space-xl) 0;
   margin-top: auto;
 }
 
 .layout__footer-content {
-  max-width: 1200px;
+  max-width: var(--container-xl);
   margin: 0 auto;
+  padding: 0 var(--space-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-md);
+}
+
+.layout__footer-content p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }
 
 .layout__footer-link {
-  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.2s;
+  transition: color var(--transition-fast);
 }
 
 .layout__footer-link:hover {
-  color: white;
-  text-decoration: underline;
+  color: var(--color-text-inverse);
 }
 
-@media (max-width: 600px) {
+/* Responsive */
+@media (max-width: 768px) {
+  .layout__main {
+    padding-top: 70px;
+  }
+
   .layout__footer-content {
     flex-direction: column;
     text-align: center;
-  }
-
-  .layout__footer {
-    padding: 1rem;
-  }
-
-  .layout__main {
-    padding: 1rem;
   }
 }

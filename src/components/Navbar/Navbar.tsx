@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../../stores';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
 import './Navbar.css';
 
-const Navbar: React.FC = () => {
-  const { isAuthenticated, logout, isModerator } = useAuth();
+const Navbar: React.FC = observer(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
   };
 
   const handleLogout = () => {
-    logout();
+    authStore.logout();
     navigate('/login');
     setMobileOpen(false);
     setDropdownOpen(false);
@@ -67,7 +67,7 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="navbar__auth">
-            {isAuthenticated ? (
+            {authStore.isAuthenticated ? (
               <div className="navbar__user-actions">
                 <div className="navbar__dropdown-container">
                   <button 
@@ -88,7 +88,7 @@ const Navbar: React.FC = () => {
                         Профиль
                       </Link>
                       
-                      {isModerator && (
+                      {authStore.isModerator && (
                         <Link 
                           to="/admin" 
                           className="navbar__dropdown-item"
@@ -157,7 +157,7 @@ const Navbar: React.FC = () => {
                   </Link>
                 </li>
               ))}
-              {isAuthenticated && (
+              {authStore.isAuthenticated && (
                 <li>
                   <Link
                     to="/profile"
@@ -169,7 +169,7 @@ const Navbar: React.FC = () => {
                   </Link>
                 </li>
               )}
-              {isAuthenticated && isModerator && (
+              {authStore.isAuthenticated && authStore.isModerator && (
                 <li>
                   <Link
                     to="/admin"
@@ -183,7 +183,7 @@ const Navbar: React.FC = () => {
               )}
             </ul>
             <div className="drawer__auth">
-              {isAuthenticated ? (
+              {authStore.isAuthenticated ? (
                 <button onClick={handleLogout} className="btn btn-primary btn-block">
                   Выйти
                 </button>
@@ -209,6 +209,6 @@ const Navbar: React.FC = () => {
       </div>
     </nav>
   );
-};
+});
 
 export default Navbar;

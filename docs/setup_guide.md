@@ -5,11 +5,11 @@
 ### Обязательно
 
 - **Node.js** версии 18 или выше
-- **npm** (обычно идёт в комплекте с Node.js)
+- **npm** (идёт в комплекте с Node.js)
 
 ### Для полного функционала
 
-- **Backend API** — запущенный сервер на порту 4000
+- **Backend API** — сервер на порту 4000
 - **PostgreSQL** — база данных для бэкенда
 
 ## Установка
@@ -32,7 +32,7 @@ npm install
 Создайте файл `.env` в корне проекта:
 
 ```env
-VITE_API_URL=http://localhost:4000/api
+VITE_API_URL=http://localhost:4000
 VITE_GITHUB_USERNAME=your-github-username
 ```
 
@@ -52,7 +52,7 @@ npm run dev
 npm run build
 ```
 
-Результат сборки находится в папке `dist/`.
+Результат сборки в папке `dist/`.
 
 ### Предварительный просмотр сборки
 
@@ -62,104 +62,123 @@ npm run preview
 
 ## Скрипты
 
-| Команда           | Описание                       |
-| ----------------- | ------------------------------ |
-| `npm run dev`     | Запуск dev-сервера с HMR       |
-| `npm run build`   | Сборка для продакшена          |
-| `npm run preview` | Просмотр собранного приложения |
-| `npm run lint`    | Проверка кода ESLint           |
+| Команда           | Описание                          |
+| ----------------- | --------------------------------- |
+| `npm run dev`     | Запуск dev-сервера с HMR          |
+| `npm run build`   | TypeScript проверка + Vite сборка |
+| `npm run preview` | Просмотр собранного приложения    |
+| `npm run lint`    | Проверка кода ESLint              |
 
 ## Работа с бэкендом
 
-### Запуск бэкенда
-
-Фронтенд ожидает API на `http://localhost:4000`. Убедитесь, что бэкенд запущен:
-
-```bash
-cd ../portfolio-website-backend
-npm install
-npm run dev
-```
+Фронтенд ожидает API на `http://localhost:4000`.
 
 ### API Endpoints
 
-Приложение использует следующие эндпоинты:
+#### Авторизация
 
-- `POST /api/auth/login` — вход
-- `POST /api/auth/register` — регистрация
-- `GET /api/auth/profile` — профиль пользователя
-- `GET/POST /api/projects` — проекты
-- `GET/POST /api/reviews` — отзывы
-- `GET /api/admin/stats` — статистика (admin)
-- `GET /api/admin/users` — пользователи (admin)
+| Метод | Endpoint         | Описание         | Ответ                          |
+| ----- | ---------------- | ---------------- | ------------------------------ |
+| POST  | `/auth/register` | Регистрация      | `{ user, token, permissions }` |
+| POST  | `/auth/login`    | Вход             | `{ user, token, permissions }` |
+| POST  | `/auth/logout`   | Выход            | `{ message }`                  |
+| GET   | `/auth/profile`  | Получить профиль | `{ user, permissions }`        |
+| PUT   | `/auth/profile`  | Обновить профиль | `{ user, permissions }`        |
 
-## Устранение неполадок
+#### Проекты
 
-### Ошибки TypeScript при сборке
+| Метод | Endpoint        | Описание        | Доступ          |
+| ----- | --------------- | --------------- | --------------- |
+| GET   | `/projects`     | Список проектов | Auth            |
+| GET   | `/projects/:id` | Получить проект | Auth            |
+| POST  | `/projects`     | Создать проект  | Auth            |
+| PATCH | `/projects/:id` | Обновить проект | Admin/Moderator |
 
-**Проблема:** Ошибки с enum'ами
-**Решение:** Проект использует `const` объекты вместо `enum` для совместимости с `erasableSyntaxOnly`:
+#### Отзывы
 
-```typescript
-// Вместо: enum Status { PENDING = 'pending' }
-// Используйте:
-export const Status = { PENDING: 'pending' } as const;
-export type Status = (typeof Status)[keyof typeof Status];
-```
+| Метод  | Endpoint       | Описание       | Доступ      |
+| ------ | -------------- | -------------- | ----------- |
+| GET    | `/reviews`     | Список отзывов | Public      |
+| GET    | `/reviews/:id` | Получить отзыв | Public      |
+| POST   | `/reviews`     | Создать отзыв  | Auth        |
+| PUT    | `/reviews/:id` | Обновить отзыв | Owner       |
+| DELETE | `/reviews/:id` | Удалить отзыв  | Owner/Admin |
 
-**Проблема:** `verbatimModuleSyntax` ошибки импортов
-**Решение:** Разделяйте type и value импорты:
+#### Контакты
 
-```typescript
-// Неправильно:
-import { User, UserRole } from './types';
+| Метод | Endpoint   | Описание            | Доступ |
+| ----- | ---------- | ------------------- | ------ |
+| POST  | `/contact` | Отправить сообщение | Public |
 
-// Правильно:
-import type { User } from './types';
-import { UserRole } from './types';
-```
+#### Админ
 
-### Проблемы с зависимостями
+| Метод | Endpoint          | Описание         | Доступ |
+| ----- | ----------------- | ---------------- | ------ |
+| GET   | `/admin/stats`    | Статистика       | Admin  |
+| GET   | `/admin/users`    | Все пользователи | Admin  |
+| GET   | `/admin/projects` | Все проекты      | Admin  |
+| GET   | `/admin/reviews`  | Все отзывы       | Admin  |
 
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
+## Структура MobX Stores
 
-### CORS ошибки
+### Использование в компонентах
 
-Убедитесь, что бэкенд настроен на прием запросов с `http://localhost:5173`:
+```tsx
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../../stores';
 
-```typescript
-// На бэкенде:
-app.use(cors({ origin: 'http://localhost:5173' }));
-```
-
-### Приложение не видит API
-
-1. Проверьте, что бэкенд запущен на порту 4000
-2. Проверьте настройки в `src/api/axios.ts`
-3. Откройте DevTools → Network и проверьте запросы
-
-## Структура конфигурации
-
-### vite.config.ts
-
-```typescript
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 5173,
-    open: true,
-  },
+const MyComponent = observer(() => {
+  // Автоматически перерендерится при изменении store
+  return <div>{authStore.user?.firstName}</div>;
 });
 ```
 
-### tsconfig.json
+### Вызов actions
 
-Основные настройки TypeScript:
+```tsx
+// Логин
+const handleLogin = async () => {
+  const success = await authStore.loginUser({ email, password });
+  if (success) navigate('/');
+};
 
-- `target`: ESNext
-- `module`: ESNext
-- `strict`: true
-- `erasableSyntaxOnly`: true (требует const вместо enum)
+// Загрузка данных
+useEffect(() => {
+  reviewsStore.loadReviews();
+}, []);
+```
+
+## Переменные окружения
+
+| Переменная             | Описание        | По умолчанию            |
+| ---------------------- | --------------- | ----------------------- |
+| `VITE_API_URL`         | URL бэкенд API  | `http://localhost:4000` |
+| `VITE_GITHUB_USERNAME` | GitHub username | -                       |
+
+**Важно:** Все переменные должны начинаться с `VITE_`.
+
+## Частые проблемы
+
+### CORS ошибки
+
+Убедитесь, что бэкенд разрешает запросы с `http://localhost:5173`:
+
+```typescript
+// На бэкенде
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  })
+);
+```
+
+### 401 Unauthorized
+
+- Проверьте, что токен сохраняется в localStorage
+- Проверьте, что бэкенд запущен и доступен
+
+### Стили не применяются
+
+- Убедитесь, что CSS файл импортирован в компонент
+- Проверьте имена классов на соответствие BEM

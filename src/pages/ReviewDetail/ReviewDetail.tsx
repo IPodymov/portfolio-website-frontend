@@ -1,35 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { reviewsApi } from '../../api/reviews';
-import type { Review, ServiceQuality } from '../../types';
+import { observer } from 'mobx-react-lite';
+import type { ServiceQuality } from '../../types';
+import { reviewsStore } from '../../stores';
 import { StarRating } from '../../components/StarRating';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { SERVICE_QUALITY_LABELS } from '../../constants';
 import './ReviewDetail.css';
 
-const ReviewDetail: React.FC = () => {
+const ReviewDetail: React.FC = observer(() => {
   const { id } = useParams<{ id: string }>();
-  const [review, setReview] = useState<Review | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (id) {
-      reviewsApi
-        .getById(Number(id))
-        .then((data) => setReview(data))
-        .catch((err) => {
-          console.error(err);
-          setError('Не удалось загрузить отзыв');
-        })
-        .finally(() => setLoading(false));
+      reviewsStore.loadReviewById(Number(id));
     }
+    return () => {
+      reviewsStore.clearCurrentReview();
+    };
   }, [id]);
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <div className="error-state">{error}</div>;
-  if (!review) return <div className="error-state">Отзыв не найден</div>;
+  if (reviewsStore.isLoading) return <LoadingSpinner />;
+  if (reviewsStore.error) return <div className="error-state">{reviewsStore.error}</div>;
+  if (!reviewsStore.currentReview) return <div className="error-state">Отзыв не найден</div>;
 
+  const review = reviewsStore.currentReview;
   const authorName = review.username || 
     `${review.user?.firstName || ''} ${review.user?.lastName || ''}`.trim() || 
     'Аноним';
@@ -78,6 +73,6 @@ const ReviewDetail: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default ReviewDetail;

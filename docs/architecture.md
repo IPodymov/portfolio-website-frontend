@@ -3,194 +3,319 @@
 ## Структура директорий
 
 ```
-src/
-├── api/                    # Модули для взаимодействия с API
-│   ├── index.ts            # Реэкспорт всех API модулей
-│   ├── axios.ts            # Настроенный экземпляр axios с интерсепторами
-│   ├── admin.ts            # API админ-панели (статистика, управление)
-│   ├── auth.ts             # API авторизации (login, register, profile)
-│   ├── contact.ts          # API контактной формы
-│   ├── github.ts           # API GitHub (профиль, репозитории)
-│   ├── notifications.ts    # API уведомлений
-│   ├── projects.ts         # API проектов (CRUD)
-│   └── reviews.ts          # API отзывов (CRUD)
-├── assets/                 # Статические ресурсы
-│   └── fonts/              # Шрифты
-├── components/             # Переиспользуемые UI компоненты
-│   ├── CookieConsent/      # Баннер согласия с Cookie
-│   ├── Form/               # Компоненты форм
-│   │   ├── FormField.tsx   # Универсальный компонент поля формы
-│   │   └── Form.css        # Стили форм
-│   ├── Layout/             # Основной макет (Navbar, Footer)
-│   ├── LoadingSpinner/     # Компонент загрузки
-│   ├── Navbar/             # Навигационная панель
-│   ├── StarRating/         # Компонент рейтинга звёздами
-│   └── StatusBadge/        # Бейдж статуса проекта
-├── context/                # React Context
-│   └── AuthContext.tsx     # Контекст авторизации (user, login, logout)
-├── hooks/                  # Кастомные хуки
-│   ├── index.ts            # Реэкспорт хуков
-│   ├── useApi.ts           # Хук для API-запросов (loading, error, execute)
-│   └── useForm.ts          # Хук для работы с формами (values, handleChange)
-├── pages/                  # Компоненты страниц
-│   ├── Admin/              # Админ-панель (Dashboard, Users, Projects, Reviews)
-│   ├── Contacts/           # Страница контактов
-│   ├── Home/               # Главная страница
-│   ├── Login/              # Страница входа
-│   ├── Order/              # Страница заказа проекта
-│   ├── PrivacyPolicy/      # Политика конфиденциальности
-│   ├── Profile/            # Личный кабинет пользователя
-│   ├── Register/           # Страница регистрации
-│   ├── ReviewDetail/       # Детальный просмотр отзыва
-│   └── Reviews/            # Список отзывов
-├── types/                  # TypeScript типы
-│   └── index.ts            # Все интерфейсы и константы типов
-├── App.tsx                 # Корневой компонент с маршрутизацией
-├── App.css                 # Глобальные стили приложения
-├── main.tsx                # Точка входа
-└── index.css               # CSS переменные и базовые стили
+portfolio-website-frontend/
+├── docs/                   # Документация проекта
+├── public/                 # Статические файлы
+├── src/
+│   ├── assets/             # Статические ресурсы
+│   │   └── fonts/          # Шрифты (Onest)
+│   ├── components/         # Переиспользуемые UI компоненты
+│   │   ├── CookieConsent/  # Баннер согласия с Cookie
+│   │   ├── Form/           # Компоненты форм
+│   │   ├── Layout/         # Основной макет страниц
+│   │   ├── LoadingSpinner/ # Индикатор загрузки
+│   │   ├── Navbar/         # Навигационная панель
+│   │   ├── StarRating/     # Компонент рейтинга
+│   │   └── StatusBadge/    # Бейдж статуса проекта
+│   ├── constants/          # Константы приложения
+│   │   └── index.ts        # Опции для селектов
+│   ├── stores/             # MobX stores
+│   │   ├── api.ts          # Настроенный axios instance
+│   │   ├── index.ts        # Реэкспорт stores
+│   │   ├── AuthStore.ts    # Store авторизации
+│   │   ├── ReviewsStore.ts # Store отзывов
+│   │   ├── ProjectsStore.ts# Store проектов
+│   │   ├── AdminStore.ts   # Store админ-панели
+│   │   ├── GitHubStore.ts  # Store GitHub данных
+│   │   ├── ContactStore.ts # Store контактной формы
+│   │   └── CookieConsentStore.ts # Store cookie consent
+│   ├── hooks/              # Кастомные хуки
+│   │   └── index.ts        # useForm, useApi
+│   ├── pages/              # Компоненты страниц
+│   │   ├── Admin/          # Админ-панель
+│   │   ├── Contacts/       # Страница контактов
+│   │   ├── Home/           # Главная страница
+│   │   ├── Login/          # Страница входа
+│   │   ├── Order/          # Страница заказа
+│   │   ├── PrivacyPolicy/  # Политика конфиденциальности
+│   │   ├── Profile/        # Личный кабинет
+│   │   ├── Register/       # Страница регистрации
+│   │   ├── ReviewDetail/   # Детальный просмотр отзыва
+│   │   └── Reviews/        # Список отзывов
+│   ├── types/              # TypeScript типы
+│   │   └── index.ts        # Все интерфейсы
+│   ├── App.tsx             # Корневой компонент с роутингом
+│   ├── App.css             # Глобальные стили приложения
+│   ├── main.tsx            # Точка входа
+│   └── index.css           # Дизайн-система (CSS Variables)
+├── eslint.config.js        # Конфигурация ESLint
+├── tsconfig.json           # Конфигурация TypeScript
+├── vite.config.ts          # Конфигурация Vite
+└── package.json            # Зависимости и скрипты
 ```
 
-## Ключевые компоненты
+## MobX Architecture
+
+### Stores
+
+Все stores находятся в `src/stores/` и экспортируются через `index.ts`:
+
+```typescript
+// src/stores/index.ts
+export { authStore } from './AuthStore';
+export { reviewsStore } from './ReviewsStore';
+export { projectsStore } from './ProjectsStore';
+export { adminStore } from './AdminStore';
+export { githubStore } from './GitHubStore';
+export { contactStore } from './ContactStore';
+export { cookieConsentStore } from './CookieConsentStore';
+```
+
+### AuthStore
+
+Центральный store для аутентификации:
+
+```typescript
+class AuthStore {
+  user: User | null = null;
+  permissions: string[] = [];
+  isLoading = true;
+  error: string | null = null;
+
+  // Computed
+  get isAuthenticated(): boolean;
+  get isAdmin(): boolean;
+  get isModerator(): boolean;
+
+  // Actions
+  loginUser(data: LoginData): Promise<boolean>;
+  registerUser(data: RegisterData): Promise<boolean>;
+  logout(): void;
+  updateProfile(data: ProfileData): Promise<boolean>;
+  checkAuth(): Promise<void>;
+  refreshUser(): Promise<void>;
+}
+```
+
+### API Layer
+
+Все API вызовы интегрированы в stores. Axios instance настроен в `stores/api.ts`:
+
+```typescript
+// src/stores/api.ts
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:4000',
+  withCredentials: true,
+});
+
+// Request interceptor - добавляет JWT token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response interceptor - обрабатывает 401
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;
+```
+
+## Компоненты
 
 ### Layout
 
-Обёртка для всех страниц приложения. Содержит `Navbar`, основной контент и `Footer`. Управляет отображением `CookieConsent`. Автоматически скрывает Footer на странице админ-панели.
+Обёртка для всех страниц:
+
+- Содержит `Navbar`, основной контент (`Outlet`) и `Footer`
+- Управляет отображением `CookieConsent`
+
+```tsx
+const Layout: React.FC = () => {
+  return (
+    <div className="layout">
+      <Navbar />
+      <main className="layout__main">
+        <Outlet />
+      </main>
+      <footer className="layout__footer">{/* Footer content */}</footer>
+      <CookieConsent />
+    </div>
+  );
+};
+```
 
 ### Navbar
 
 Навигационная панель с адаптивным дизайном:
 
-- **Desktop:** Горизонтальное меню с ссылками и профильным dropdown-меню.
-- **Mobile:** Гамбургер-меню с Drawer (чистый CSS, без MUI).
-- **Профильное меню:** Dropdown с иконками для Профиль, Админ панель (для админов), Выход.
-- Использует `useLocation` для подсветки активного пункта меню.
+- **Desktop:** Горизонтальное меню + профильный dropdown
+- **Mobile:** Drawer-меню с анимацией
+- Обёрнут в `observer` для реактивности с MobX
 
-### Form Components
+### Использование MobX в компонентах
 
-Переиспользуемые компоненты для форм:
+```tsx
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../../stores';
 
-- **FormField:** Универсальный компонент поля с поддержкой input, textarea, select, hint.
-- **useForm:** Хук для управления состоянием формы.
+const MyComponent: React.FC = observer(() => {
+  // Компонент автоматически перерендерится при изменении authStore
+  if (authStore.isLoading) return <LoadingSpinner />;
 
-### AdminPanel
-
-Полнофункциональная админ-панель:
-
-- **Desktop:** Боковая навигация (sidebar) + основной контент.
-- **Mobile:** Горизонтальные табы (pills) вверху страницы.
-- **Dashboard:** Статистика, графики по статусам, последние записи.
-- **CRUD-таблицы:** Пользователи, Проекты, Отзывы с возможностью редактирования.
-
-### Utility Components
-
-- **LoadingSpinner:** Индикатор загрузки с анимацией.
-- **StarRating:** Интерактивный компонент рейтинга (1-5 звёзд).
-- **StatusBadge:** Цветной бейдж для отображения статуса проекта.
-
-## Взаимодействие с API
-
-### Конфигурация Axios
-
-```typescript
-// src/api/axios.ts
-const api = axios.create({
-  baseURL: 'http://localhost:4000/api',
-  headers: { 'Content-Type': 'application/json' },
-});
-
-// Интерсептор добавляет JWT-токен к запросам
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
+  return (
+    <div>
+      {authStore.isAuthenticated ? (
+        <p>Привет, {authStore.user?.firstName}!</p>
+      ) : (
+        <Link to="/login">Войти</Link>
+      )}
+    </div>
+  );
 });
 ```
 
-### API Модули
+## CSS Architecture
 
-| Модуль     | Эндпоинты                                        | Описание         |
-| ---------- | ------------------------------------------------ | ---------------- |
-| `auth`     | `/auth/login`, `/auth/register`, `/auth/profile` | Авторизация      |
-| `projects` | `/projects`                                      | CRUD проектов    |
-| `reviews`  | `/reviews`                                       | CRUD отзывов     |
-| `admin`    | `/admin/stats`, `/admin/users`, etc.             | Админ-функции    |
-| `github`   | GitHub API                                       | Публичные данные |
+### Дизайн-система (index.css)
 
-### Кастомный хук useApi
-
-```typescript
-const { data, loading, error, execute } = useApi(apiFunction);
-```
-
-## Типизация
-
-### Константы как объекты
-
-Для совместимости с `erasableSyntaxOnly` используются `const` объекты вместо `enum`:
-
-```typescript
-export const ProjectStatus = {
-  PENDING: 'pending',
-  IN_PROGRESS: 'in_progress',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
-} as const;
-
-export type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus];
-```
-
-### Основные интерфейсы
-
-- `User` — пользователь (id, email, firstName, lastName, telegram, role)
-- `Project` — проект (id, clientName, type, status, description, etc.)
-- `Review` — отзыв (id, body, rating, serviceQuality, author, etc.)
-- `AdminStats` — статистика для Dashboard
-
-## Стилизация
-
-### CSS Variables
+Централизованные CSS переменные:
 
 ```css
 :root {
-  --color-primary: #1a1a2e;
-  --color-accent: #4361ee;
-  --color-text: #1f2937;
-  --color-text-secondary: #6b7280;
-  --color-background: #f9fafb;
+  /* Colors */
+  --color-primary: #0f172a;
+  --color-accent: #6366f1;
+  --color-bg: #f8fafc;
+  --color-text: #0f172a;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
 }
 ```
 
-### Адаптивность
+### BEM Naming
 
-Основные точки перелома:
-
-- **Desktop:** > 768px
-- **Tablet:** 481px — 768px
-- **Mobile:** ≤ 480px
+Все классы следуют BEM методологии:
 
 ```css
-@media (max-width: 768px) {
-  /* Планшеты */
+/* Block */
+.card {
 }
-@media (max-width: 480px) {
-  /* Мобильные */
+
+/* Element */
+.card__title {
+}
+.card__content {
+}
+
+/* Modifier */
+.card--hover {
+}
+.card--glass {
 }
 ```
 
-## Маршрутизация
+### Breakpoints
+
+```css
+/* Tablet */
+@media (max-width: 768px) {
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+}
+```
+
+## Routing
+
+Маршрутизация через React Router v7:
 
 ```tsx
+// App.tsx
 <Routes>
-  <Route path="/" element={<Home />} />
-  <Route path="/contacts" element={<Contacts />} />
-  <Route path="/reviews" element={<Reviews />} />
-  <Route path="/reviews/:id" element={<ReviewDetail />} />
-  <Route path="/login" element={<Login />} />
-  <Route path="/register" element={<Register />} />
-  <Route path="/order" element={<Order />} /> {/* Protected */}
-  <Route path="/profile" element={<Profile />} /> {/* Protected */}
-  <Route path="/admin" element={<AdminPanel />} /> {/* Admin only */}
-  <Route path="/privacy" element={<PrivacyPolicy />} />
+  <Route path="/" element={<Layout />}>
+    <Route index element={<Home />} />
+    <Route path="contacts" element={<Contacts />} />
+    <Route path="reviews" element={<Reviews />} />
+    <Route path="reviews/:id" element={<ReviewDetail />} />
+    <Route path="order" element={<Order />} />
+    <Route path="profile" element={<Profile />} />
+    <Route path="admin" element={<AdminPanel />} />
+    <Route path="privacy" element={<PrivacyPolicy />} />
+  </Route>
+  <Route path="login" element={<Login />} />
+  <Route path="register" element={<Register />} />
 </Routes>
+```
+
+## TypeScript Types
+
+Все типы в `src/types/index.ts`:
+
+```typescript
+interface User {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  telegram?: string;
+  role: 'user' | 'moderator' | 'admin';
+  createdAt: string;
+}
+
+interface Review {
+  id: number;
+  title: string;
+  body: string;
+  rating: number;
+  userId: number;
+  user?: User;
+  createdAt: string;
+}
+
+interface Project {
+  id: number;
+  clientName: string;
+  type: ProjectType;
+  status: ProjectStatus;
+  description: string;
+  telegram: string;
+  createdAt: string;
+}
+
+type ProjectType = 'landing' | 'ecommerce' | 'webapp' | 'bot' | 'other';
+type ProjectStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 ```

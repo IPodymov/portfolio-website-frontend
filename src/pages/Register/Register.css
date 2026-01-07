@@ -1,75 +1,75 @@
-.auth-page {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background-color: var(--color-background);
-}
+/* ========================================
+   REGISTER PAGE - BEM
+   Uses shared auth styles from Login.css
+   ======================================== */
 
-.auth-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 480px;
-}
+/* Register specific styles - inherits from Login.css */
 
-.auth-card .form-group {
-  margin-bottom: 1rem;
-}
-
-.auth-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.auth-form-row .form-group {
-  margin-bottom: 0;
-}
-
-.auth-title {
+.auth__terms {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
   text-align: center;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  color: var(--color-primary);
-  font-weight: 600;
+  margin-top: var(--space-md);
+  line-height: 1.6;
 }
 
-.auth-footer {
-  text-align: center;
-  margin-top: 1rem;
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
-.auth-footer a {
+.auth__terms a {
   color: var(--color-accent);
   text-decoration: none;
-  font-weight: 500;
-  margin-left: 0.25rem;
 }
 
-.auth-footer a:hover {
+.auth__terms a:hover {
   text-decoration: underline;
 }
 
+/* Password strength indicator */
+.auth__password-strength {
+  margin-top: var(--space-sm);
+}
+
+.auth__password-strength-bar {
+  height: 4px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.auth__password-strength-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-base);
+}
+
+.auth__password-strength-fill--weak {
+  width: 33%;
+  background: var(--color-error);
+}
+
+.auth__password-strength-fill--medium {
+  width: 66%;
+  background: var(--color-warning);
+}
+
+.auth__password-strength-fill--strong {
+  width: 100%;
+  background: var(--color-success);
+}
+
+.auth__password-strength-text {
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-xs);
+  text-align: right;
+}
+
+/* Two column form */
+.auth__form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
 @media (max-width: 480px) {
-  .auth-card {
-    padding: 1.5rem;
-    margin: 0 0.5rem;
-    max-width: 100%;
-  }
-
-  .auth-title {
-    font-size: 1.5rem;
-  }
-
-  .auth-form-row {
+  .auth__form-row {
     grid-template-columns: 1fr;
-    gap: 1.25rem;
   }
 }

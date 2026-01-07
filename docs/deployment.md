@@ -11,19 +11,19 @@ npm run build
 Процесс сборки:
 
 1. **TypeScript компиляция** — проверка типов (`tsc -b`)
-2. **Vite build** — оптимизация и бандлинг ассетов
+2. **Vite build** — оптимизация и бандлинг
 
-Результат находится в директории `dist/`.
+Результат в директории `dist/`.
 
 ### Содержимое dist/
 
 ```
 dist/
-├── index.html          # Точка входа
+├── index.html              # Точка входа
 ├── assets/
-│   ├── index-[hash].js # Основной JS бандл
-│   ├── index-[hash].css # Стили
-│   └── fonts/          # Шрифты
+│   ├── index-[hash].js     # JS бандл (~456 KB, ~146 KB gzip)
+│   ├── index-[hash].css    # Стили (~56 KB, ~9 KB gzip)
+│   └── Onest-*.ttf         # Шрифты (~64 KB каждый)
 └── favicon.ico
 ```
 
@@ -41,7 +41,7 @@ VITE_GITHUB_USERNAME=your-username
 ### Использование в коде
 
 ```typescript
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 ```
 
 **Важно:** Все переменные должны начинаться с `VITE_`.
@@ -54,13 +54,17 @@ const apiUrl = import.meta.env.VITE_API_URL;
 2. Vercel автоматически определит Vite проект
 3. Настройки по умолчанию работают из коробки
 
-**vercel.json** (опционально):
+**vercel.json** (для SPA routing):
 
 ```json
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
 ```
+
+**Переменные окружения** в панели Vercel:
+
+- `VITE_API_URL` = URL вашего бэкенда
 
 ### Netlify
 
@@ -93,48 +97,13 @@ npm install -D gh-pages
 }
 ```
 
-3. В vite.config.ts добавьте base:
+3. Добавьте в vite.config.ts:
 
 ```typescript
 export default defineConfig({
   base: '/repo-name/',
   // ...
 });
-```
-
-4. Деплой:
-
-```bash
-npm run deploy
-```
-
-### Nginx (VPS/Dedicated)
-
-1. Скопируйте содержимое `dist/` на сервер
-2. Настройте Nginx:
-
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    root /var/www/portfolio/dist;
-    index index.html;
-
-    # SPA routing
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Кэширование статики
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # Gzip
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
-}
 ```
 
 ### Docker
@@ -163,11 +132,17 @@ CMD ["nginx", "-g", "daemon off;"]
 ```nginx
 server {
     listen 80;
+    server_name localhost;
     root /usr/share/nginx/html;
     index index.html;
 
     location / {
         try_files $uri $uri/ /index.html;
+    }
+
+    location /assets {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
     }
 }
 ```
@@ -178,6 +153,29 @@ server {
 docker build -t portfolio-frontend .
 docker run -p 80:80 portfolio-frontend
 ```
+
+## Оптимизация
+
+### Анализ бандла
+
+```bash
+npm run build -- --analyze
+```
+
+### Текущие метрики
+
+| Файл   | Размер  | Gzip    |
+| ------ | ------- | ------- |
+| JS     | ~456 KB | ~146 KB |
+| CSS    | ~56 KB  | ~9 KB   |
+| Шрифты | ~580 KB | -       |
+
+### Рекомендации
+
+1. **Code Splitting** — уже реализовано через React Router lazy loading
+2. **Шрифты** — рассмотрите woff2 формат для меньшего размера
+3. **Images** — используйте WebP/AVIF форматы
+4. **Caching** — настройте долгий cache для assets
 
 ## CI/CD
 
@@ -195,10 +193,11 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
@@ -210,34 +209,26 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_API_URL: ${{ secrets.API_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Deploy to Vercel
-        uses: vercel/action@v1
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          vercel-args: '--prod'
 ```
-
-## Чеклист перед деплоем
-
-- [ ] Переменные окружения настроены для продакшена
-- [ ] API URL указывает на продакшен-сервер
-- [ ] CORS на бэкенде настроен для домена фронтенда
-- [ ] Сборка проходит без ошибок (`npm run build`)
-- [ ] Линтер не выдаёт критических ошибок
-- [ ] Тестирование основных сценариев (login, register, order)
-- [ ] Проверка мобильной версии
-- [ ] SSL сертификат настроен (HTTPS)
 
 ## Мониторинг
 
-### Рекомендуемые инструменты
+### Рекомендуемые сервисы
 
 - **Sentry** — отслеживание ошибок
-- **Google Analytics** — аналитика посещений
-- **Lighthouse** — аудит производительности
+- **Vercel Analytics** — производительность
+- **Google Analytics** — статистика посещений
 
-### Установка Sentry (опционально)
+### Интеграция Sentry
 
 ```bash
 npm install @sentry/react
@@ -252,3 +243,13 @@ Sentry.init({
   environment: import.meta.env.MODE,
 });
 ```
+
+## Чеклист перед деплоем
+
+- [ ] Все тесты проходят
+- [ ] `npm run lint` без ошибок
+- [ ] `npm run build` успешен
+- [ ] Переменные окружения настроены
+- [ ] CORS на бэкенде разрешает production домен
+- [ ] SSL сертификат настроен
+- [ ] Редиректы для SPA настроены

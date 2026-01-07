@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { authApi } from '../../api/auth';
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../../stores';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import './Profile.css';
 
-const Profile: React.FC = () => {
-  const { user, refreshUser, isAuthenticated } = useAuth();
+const Profile: React.FC = observer(() => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,18 +21,18 @@ const Profile: React.FC = () => {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!authStore.isAuthenticated) {
       navigate('/login');
       return;
     }
-    if (user) {
+    if (authStore.user) {
       setFormData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        telegram: user.telegram || ''
+        firstName: authStore.user.firstName || '',
+        lastName: authStore.user.lastName || '',
+        telegram: authStore.user.telegram || ''
       });
     }
-  }, [user, isAuthenticated, navigate]);
+  }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -46,19 +45,19 @@ const Profile: React.FC = () => {
     setError('');
     setSuccess('');
 
-    try {
-      await authApi.updateProfile(formData);
-      await refreshUser();
+    const success = await authStore.updateProfile(formData);
+    
+    if (success) {
       setSuccess('Профиль успешно обновлен');
       setIsEditing(false);
-    } catch {
+    } else {
       setError('Не удалось обновить профиль');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
-  if (!user) {
+  if (!authStore.user) {
     return <LoadingSpinner />;
   }
 
@@ -69,8 +68,8 @@ const Profile: React.FC = () => {
           <div className="profile__avatar">
             <PersonIcon />
           </div>
-          <h1 className="profile__name">{user.firstName} {user.lastName}</h1>
-          <span className="profile__role">{user.role}</span>
+          <h1 className="profile__name">{authStore.user.firstName} {authStore.user.lastName}</h1>
+          <span className="profile__role">{authStore.user.role}</span>
         </div>
 
         {error && <div className="form-error">{error}</div>}
@@ -132,17 +131,17 @@ const Profile: React.FC = () => {
           <div className="profile__info card">
             <div className="profile__info-item">
               <EmailIcon />
-              <span>{user.email}</span>
+              <span>{authStore.user.email}</span>
             </div>
-            {user.telegram && (
+            {authStore.user.telegram && (
               <div className="profile__info-item">
                 <TelegramIcon />
-                <span>{user.telegram}</span>
+                <span>{authStore.user.telegram}</span>
               </div>
             )}
             <div className="profile__info-item">
               <span className="profile__info-label">Дата регистрации:</span>
-              <span>{user.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : '-'}</span>
+              <span>{authStore.user.createdAt ? new Date(authStore.user.createdAt).toLocaleDateString('ru-RU') : '-'}</span>
             </div>
             <button
               className="btn btn-primary"
@@ -155,6 +154,6 @@ const Profile: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Profile;

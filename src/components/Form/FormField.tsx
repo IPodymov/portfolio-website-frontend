@@ -5,7 +5,9 @@ interface FormFieldProps {
   name: string;
   type?: 'text' | 'email' | 'password' | 'url' | 'textarea' | 'select';
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => void;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;

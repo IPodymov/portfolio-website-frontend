@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { authApi } from '../../api/auth';
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../../stores';
 import './Register.css';
 
-const Register: React.FC = () => {
+const Register: React.FC = observer(() => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -12,9 +12,7 @@ const Register: React.FC = () => {
     password: '',
     telegram: ''
   });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,27 +22,28 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    authStore.clearError();
     setLoading(true);
     
-    try {
-      const user = await authApi.register(formData);
-      login(user);
+    const success = await authStore.registerUser(formData);
+    
+    if (success) {
       navigate('/');
-    } catch {
-      setError('Ошибка регистрации. Возможно email уже занят.');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card card">
-        <h2 className="auth-title">Регистрация</h2>
-        {error && <div className="form-error">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="auth-form-row">
+    <div className="auth">
+      <div className="auth__card">
+        <div className="auth__header">
+          <h2 className="auth__title">Регистрация</h2>
+          <p className="auth__subtitle">Создайте аккаунт для доступа к функциям</p>
+        </div>
+        {authStore.error && <div className="form-error">{authStore.error}</div>}
+        <form onSubmit={handleSubmit} className="auth__form">
+          <div className="auth__form-row">
             <div className="form-group">
               <label className="form-label">Имя</label>
               <input
@@ -54,6 +53,7 @@ const Register: React.FC = () => {
                 onChange={handleChange}
                 required
                 className="form-control"
+                placeholder="Иван"
                 disabled={loading}
               />
             </div>
@@ -66,6 +66,7 @@ const Register: React.FC = () => {
                 onChange={handleChange}
                 required
                 className="form-control"
+                placeholder="Иванов"
                 disabled={loading}
               />
             </div>
@@ -79,13 +80,14 @@ const Register: React.FC = () => {
               onChange={handleChange}
               required
               className="form-control"
+              placeholder="example@mail.com"
               disabled={loading}
             />
           </div>
           <div className="form-group">
             <label className="form-label">
               Telegram
-              <span className="form-hint">(обязательно для отслеживания вашего проекта)</span>
+              <span className="form-hint"> (обязательно для отслеживания вашего проекта)</span>
             </label>
             <input
               type="text"
@@ -107,19 +109,20 @@ const Register: React.FC = () => {
               onChange={handleChange}
               required
               className="form-control"
+              placeholder="••••••••"
               disabled={loading}
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+          <button type="submit" className="btn btn--primary btn--block" disabled={loading}>
             {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
         </form>
-        <p className="auth-footer">
-          Уже есть аккаунт? <Link to="/login" className="link-accent">Войти</Link>
-        </p>
+        <div className="auth__footer">
+          Уже есть аккаунт? <Link to="/login">Войти</Link>
+        </div>
       </div>
     </div>
   );
-};
+});
 
 export default Register;

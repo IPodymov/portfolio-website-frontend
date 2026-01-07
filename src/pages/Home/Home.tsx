@@ -1,37 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { githubApi } from '../../api/github';
-import type { GitHubUser, GitHubRepo } from '../../types';
+import { observer } from 'mobx-react-lite';
+import { githubStore } from '../../stores';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import StorageIcon from '@mui/icons-material/Storage';
 import BuildIcon from '@mui/icons-material/Build';
 import StarIcon from '@mui/icons-material/Star';
 import './Home.css';
-
-// DRY: Move data constants outside component
-const TARGET_REPO_NAMES = [
-  'visuliser-backend',
-  'pd-projects-backend',
-  'visualizer-front',
-  'pd-projects-frontend',
-  'fakegram-frontend',
-  'portfolio-website-frontend',
-];
-
-const CUSTOM_DESCRIPTIONS: Record<string, string> = {
-  'visuliser-backend':
-    'Веб-приложение для визуализации и сравнения образовательных программ. Реализовано на Django + DRF. Поддерживает парсинг Excel, анализ компетенций и сравнение планов.',
-  'pd-projects-backend':
-    'Бэкенд для системы управления проектами на NestJS и PostgreSQL. Реализована JWT авторизация, ролевая модель пользователей, управление учебными заведениями и фильтрация проектов.',
-  'visualizer-front':
-    'Клиентская часть системы визуализации образовательных программ. Разработана на Vue.js. Обеспечивает интерфейс для загрузки планов и просмотра аналитики.',
-  'pd-projects-frontend':
-    'Frontend для системы управления проектами. Написан на Vue.js. Реализует интерфейсы для студентов, преподавателей и администраторов.',
-  'fakegram-frontend':
-    'Instagram-клон на React + TypeScript + Redux Toolkit. Реализованы лента постов, истории, лайки, комментарии и профили пользователей.',
-  'portfolio-website-frontend':
-    'Этот сайт-портфолио. Разработан на React + Vite + TypeScript с использованием Material UI и адаптивной верстки.',
-};
 
 const SKILLS = [
   {
@@ -56,39 +31,14 @@ const SKILLS = [
   },
 ];
 
-const Home: React.FC = () => {
-  const [user, setUser] = useState<GitHubUser | null>(null);
-  const [repos, setRepos] = useState<GitHubRepo[]>([]);
-  const [loading, setLoading] = useState(true);
-
+const Home: React.FC = observer(() => {
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [userData, reposData] = await Promise.all([
-          githubApi.getUser(),
-          githubApi.getRepos(),
-        ]);
-        setUser(userData);
-
-        const filteredRepos = reposData.filter((repo) => TARGET_REPO_NAMES.includes(repo.name));
-
-        const displayRepos = filteredRepos.map((repo) => ({
-          ...repo,
-          description: CUSTOM_DESCRIPTIONS[repo.name] || repo.description,
-        }));
-
-        setRepos(displayRepos);
-      } catch (error) {
-        console.error('Error fetching GitHub data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    githubStore.loadData();
   }, []);
 
-  if (loading) return <div className="loading-screen">Загрузка...</div>;
+  if (githubStore.isLoading) return <div className="loading-screen">Загрузка...</div>;
+
+  const { user, displayRepos } = githubStore;
 
   return (
     <div className="home">
@@ -140,7 +90,7 @@ const Home: React.FC = () => {
       <section id="projects" className="home__projects">
         <h2 className="section-title">Избранные проекты</h2>
         <div className="home__projects-grid">
-          {repos.map((repo) => (
+          {displayRepos.map((repo) => (
             <div key={repo.id} className="project-card">
               <div className="project-card__header">
                 <h3 className="project-card__title">{repo.name}</h3>
@@ -207,6 +157,6 @@ const Home: React.FC = () => {
       </section>
     </div>
   );
-};
+});
 
 export default Home;

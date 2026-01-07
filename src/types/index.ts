@@ -75,6 +75,7 @@ export interface User {
   lastName?: string;
   telegram?: string;
   role: UserRole;
+  name?: string; // вычисляемое поле с бэкенда
   createdAt?: string;
   updatedAt?: string;
 }
@@ -127,10 +128,21 @@ export interface ChatMessage {
 }
 
 // Auth
-export interface LoginResponse {
-  token: string;
+export interface AuthResponse {
   user: User;
+  permissions: string[];
+  token?: string;
 }
+
+export interface LoginResponse extends AuthResponse {
+  token: string;
+}
+
+export interface RegisterResponse extends AuthResponse {
+  token: string;
+}
+
+export type ProfileResponse = AuthResponse;
 
 // GitHub
 export interface GitHubUser {

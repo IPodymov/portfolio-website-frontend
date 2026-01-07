@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { projectsApi } from '../../api/projects';
-import { contactApi } from '../../api/contact';
+import { observer } from 'mobx-react-lite';
+import { authStore, projectsStore, contactStore } from '../../stores';
 import { PROJECT_TYPE_OPTIONS } from '../../constants';
 import { ProjectType } from '../../types';
 import './Order.css';
 
-const Order: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+const Order: React.FC = observer(() => {
   const [formData, setFormData] = useState({
     name: '',
     telegram: '',
@@ -15,7 +13,6 @@ const Order: React.FC = () => {
     type: ProjectType.LANDING,
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [error, setError] = useState('');
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -27,29 +24,32 @@ const Order: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
-    setError('');
+    projectsStore.clearError();
+    contactStore.clearError();
 
-    try {
-      if (isAuthenticated) {
-        await projectsApi.create(formData);
-      } else {
-        await contactApi.sendMessage({
-          name: formData.name,
-          telegram: formData.telegram,
-          message: `Тип проекта: ${
-            PROJECT_TYPE_OPTIONS.find((o) => o.value === formData.type)?.label
-          }\n\nОписание: ${formData.description}`,
-        });
-      }
+    let success = false;
+    
+    if (authStore.isAuthenticated) {
+      success = await projectsStore.createProject(formData);
+    } else {
+      success = await contactStore.sendMessage({
+        name: formData.name,
+        telegram: formData.telegram,
+        message: `Тип проекта: ${
+          PROJECT_TYPE_OPTIONS.find((o) => o.value === formData.type)?.label
+        }\n\nОписание: ${formData.description}`,
+      });
+    }
+    
+    if (success) {
       setStatus('success');
       setFormData({ name: '', telegram: '', description: '', type: ProjectType.LANDING });
-    } catch (err: unknown) {
-      console.error(err);
+    } else {
       setStatus('error');
-      const error = err as { response?: { data?: { message?: string } }; message?: string };
-      setError(error.response?.data?.message || error.message || 'Ошибка отправки');
     }
   };
+
+  const error = projectsStore.error || contactStore.error;
 
   if (status === 'success') {
     return (
@@ -69,7 +69,7 @@ const Order: React.FC = () => {
     <div className="order-page">
       <h1 className="order-page__title">Заказать разработку ПО</h1>
       <div className="order-page__card card">
-        {status === 'error' && <div className="form-error">{error}</div>}
+        {status === 'error' && error && <div className="form-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Ваше имя</label>
@@ -134,6 +134,6 @@ const Order: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Order;

@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { authStore } from './stores';
 import Layout from './components/Layout/Layout';
 import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
@@ -14,25 +15,27 @@ import AdminPanel from './pages/Admin/AdminPanel';
 import './App.css';
 
 function App() {
+  useEffect(() => {
+    authStore.checkAuth();
+  }, []);
+
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="contacts" element={<Contacts />} />
-            <Route path="order" element={<Order />} />
-            <Route path="reviews" element={<Reviews />} />
-            <Route path="reviews/:id" element={<ReviewDetail />} />
-            <Route path="privacy" element={<PrivacyPolicy />} />
-            <Route path="admin" element={<AdminPanel />} />
-          </Route>
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="contacts" element={<Contacts />} />
+          <Route path="order" element={<Order />} />
+          <Route path="reviews" element={<Reviews />} />
+          <Route path="reviews/:id" element={<ReviewDetail />} />
+          <Route path="privacy" element={<PrivacyPolicy />} />
+          <Route path="admin" element={<AdminPanel />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 

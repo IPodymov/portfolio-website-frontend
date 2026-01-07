@@ -7,10 +7,10 @@ interface LoadingSpinnerProps {
   fullPage?: boolean;
 }
 
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  text = 'Загрузка...', 
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  text = 'Загрузка...',
   size = 'md',
-  fullPage = false 
+  fullPage = false,
 }) => {
   return (
     <div className={`loading-spinner ${fullPage ? 'loading-spinner--full' : ''}`}>

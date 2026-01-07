@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { reviewsApi } from '../../api/reviews';
-import type { Review, CreateReviewRequest } from '../../types';
+import { observer } from 'mobx-react-lite';
+import type { CreateReviewRequest } from '../../types';
 import { ServiceQuality } from '../../types';
-import { useAuth } from '../../context/AuthContext';
+import { authStore, reviewsStore } from '../../stores';
 import { StarRating } from '../../components/StarRating';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { SERVICE_QUALITY_OPTIONS, SERVICE_QUALITY_LABELS } from '../../constants';
 import './Reviews.css';
 
-const Reviews: React.FC = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+const Reviews: React.FC = observer(() => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<CreateReviewRequest>({
     body: '',
@@ -21,30 +18,18 @@ const Reviews: React.FC = () => {
     serviceQuality: ServiceQuality.EXCELLENT
   });
   const [submitting, setSubmitting] = useState(false);
-  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    loadReviews();
+    reviewsStore.loadReviews();
   }, []);
-
-  const loadReviews = async () => {
-    try {
-      const data = await reviewsApi.getAll();
-      setReviews(data);
-    } catch {
-      setError('Не удалось загрузить отзывы');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     
-    try {
-      const newReview = await reviewsApi.create(formData);
-      setReviews([newReview, ...reviews]);
+    const success = await reviewsStore.createReview(formData);
+    
+    if (success) {
       setShowForm(false);
       setFormData({
         body: '',
@@ -52,14 +37,12 @@ const Reviews: React.FC = () => {
         rating: 5,
         serviceQuality: ServiceQuality.EXCELLENT
       });
-    } catch {
-      setError('Не удалось отправить отзыв');
-    } finally {
-      setSubmitting(false);
     }
+    
+    setSubmitting(false);
   };
 
-  if (loading) {
+  if (reviewsStore.isLoading) {
     return <LoadingSpinner />;
   }
 
@@ -67,7 +50,7 @@ const Reviews: React.FC = () => {
     <div className="container">
       <div className="reviews__header">
         <h1 className="reviews__title">Отзывы клиентов</h1>
-        {isAuthenticated && (
+        {authStore.isAuthenticated && (
           <button
             className="btn btn-primary"
             onClick={() => setShowForm(!showForm)}
@@ -77,7 +60,7 @@ const Reviews: React.FC = () => {
         )}
       </div>
 
-      {error && <div className="form-error">{error}</div>}
+      {reviewsStore.error && <div className="form-error">{reviewsStore.error}</div>}
 
       {showForm && (
         <form onSubmit={handleSubmit} className="reviews__form card">
@@ -137,10 +120,10 @@ const Reviews: React.FC = () => {
       )}
 
       <div className="reviews__list">
-        {reviews.length === 0 ? (
+        {reviewsStore.reviews.length === 0 ? (
           <p className="text-center">Отзывов пока нет</p>
         ) : (
-          reviews.map((review) => (
+          reviewsStore.reviews.map((review) => (
             <Link to={`/reviews/${review.id}`} key={review.id} className="reviews__card card">
               <div className="reviews__card-header">
                 <div className="reviews__card-author">
@@ -163,6 +146,6 @@ const Reviews: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Reviews;

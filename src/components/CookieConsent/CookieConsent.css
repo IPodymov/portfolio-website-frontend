@@ -1,63 +1,61 @@
+/* ========================================
+   COOKIE CONSENT COMPONENT - BEM
+   ======================================== */
+
 .cookie-consent {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: white;
-  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  z-index: 1000;
-  border-top: 1px solid #e5e7eb;
-  animation: slideUp 0.5s ease-out;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 500px;
+  width: calc(100% - var(--space-xl));
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2xl);
+  padding: var(--space-lg);
+  z-index: var(--z-modal);
+  animation: slideUp var(--transition-slow) ease-out;
 }
 
 .cookie-consent__content {
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 .cookie-consent__text {
-  margin: 0;
-  color: #4b5563;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
 }
 
-.cookie-consent__link {
-  color: var(--color-primary);
+.cookie-consent__text a {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.cookie-consent__text a:hover {
   text-decoration: underline;
 }
 
-.cookie-consent__link:hover {
-  text-decoration: none;
+.cookie-consent__actions {
+  display: flex;
+  gap: var(--space-sm);
 }
 
-.cookie-consent__button {
-  white-space: nowrap;
-  padding: 0.5rem 1.5rem;
+.cookie-consent__btn {
+  flex: 1;
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 640px) {
-  .cookie-consent__content {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
+/* Responsive */
+@media (max-width: 480px) {
+  .cookie-consent {
+    bottom: var(--space-md);
+    padding: var(--space-md);
   }
   
-  .cookie-consent__button {
-    width: 100%;
+  .cookie-consent__actions {
+    flex-direction: column;
   }
 }
